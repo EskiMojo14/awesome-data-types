@@ -1,22 +1,14 @@
 # awesome-data-types
 
-A library for creating ADT enums in TypeScript. Uses Standard Schemas for runtime validation.
+A library for creating ADT enums in TypeScript, powered by runtime validation.
+
+Supports any [Standard Schema](https://standardschema.dev/) library.
 
 ```ts
 import * as v from "valibot";
 import { rgbToHex } from "./utils";
+import type { ADTValueFor, UnknownADTValue } from "awesome-data-types";
 import { construct, matches, identity, transform } from "awesome-data-types";
-
-// for compile time only validation
-const Color = construct({
-  Rgb: identity<[r: number, g: number, b: number]>(),
-  Hex: identity<[hex: string]>(),
-  Hsl: identity<[h: number, s: number, l: number]>(),
-  // supports transforming inputs
-  HexFromRgb: transform(
-    (rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)],
-  ),
-});
 
 // for runtime validation
 const Color = construct({
@@ -31,6 +23,19 @@ const Color = construct({
   ),
 });
 
+// or for compile time only validation
+const Color = construct({
+  Rgb: identity<[r: number, g: number, b: number]>(),
+  Hex: identity<[hex: string]>(),
+  Hsl: identity<[h: number, s: number, l: number]>(),
+  // supports transforming inputs
+  HexFromRgb: transform(
+    (rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)],
+  ),
+});
+
+type Color = ADTValueFor<typeof Color>;
+
 const red = Color.Rgb(255, 0, 0);
 const green = Color.Hex("#00ff00");
 const blue = Color.Hsl(240, 100, 50);
@@ -39,22 +44,32 @@ const purple = Color.HexFromRgb(128, 0, 128);
 // construct without validation or transformation
 const purple2 = Color.HexFromRgb.from("#800080");
 
-// basic matching
-if (matches(Color, red)) {
-  // red is a Color
-  color.values; // [255, 0, 0]
-}
-if (matches(Color.Rgb, red)) {
-  // red is a Color.Rgb
-  color.values; // [255, 0, 0]
+function handleUnknownValue(value: UnknownADTValue) {
+  // type guard
+  if (matches(Color, value)) {
+    // value is a Color
+    value.values; // [255, 0, 0]
+  }
+  if (matches(Color.Rgb, value)) {
+    // color is a Color.Rgb
+    color.values; // [255, 0, 0]
+  }
 }
 
-// pattern matching
-const colorString = match(red, {
-  Rgb: (r, g, b) => `rgb(${r}, ${g}, ${b})`,
-  Hex: (hex) => hex,
-  Hsl: (h, s, l) => `hsl(${h}, ${s}%, ${l}%)`,
-});
+function handleColor(color: Color) {
+  // can manually narrow
+  if (color.variant === "Rgb") {
+    // color is a Color.Rgb
+    color.values; // [255, 0, 0]
+  }
+  // pattern matching
+  const colorString = match(color, {
+    Rgb: (r, g, b) => `rgb(${r}, ${g}, ${b})`,
+    Hex: (hex) => hex,
+    Hsl: (h, s, l) => `hsl(${h}, ${s}%, ${l}%)`,
+    HexFromRgb: (hex) => hex,
+  });
+}
 ```
 
 ## API
@@ -69,6 +84,8 @@ const Color = construct({
   Hex: identity<[hex: string]>(),
   Hsl: identity<[h: number, s: number, l: number]>(),
 });
+// construct a discriminated union of values
+type Color = ADTValueFor<typeof Color>;
 ```
 
 Each variant is a function that takes the variant's arguments and returns an ADT value, storing the parsed arguments.
