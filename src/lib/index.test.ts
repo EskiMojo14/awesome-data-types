@@ -1,111 +1,164 @@
-import { describe, expect, it } from "vitest";
+import type { StandardSchemaV1 } from "@standard-schema/spec";
+import * as v from "valibot";
+import { describe, expect, it, vi } from "vitest";
 import * as keys from "./keys";
+import type { StandardSchemaV1Dictionary } from "./standard";
+import { identity, transform } from "./standard";
+import type { UnknownVariantMap, Enum, EnumValue } from "./types";
+import { objectEntries, objectKeys } from "./utils";
 import { construct, match } from "./index";
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type ColorVariants = {
-  Rgb: [r: number, g: number, b: number];
-  Hex: [hex: string];
-  Hsl: [h: number, s: number, l: number];
+function rgbToHex([r, g, b]: [number, number, number]) {
+  return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+}
+
+const identityColorVariantSchemas = {
+  Rgb: identity<[r: number, g: number, b: number]>(),
+  RgbToHex: transform(
+    (rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)],
+  ),
+  Hex: identity<[hex: string]>(),
+  Hsl: identity<[h: number, s: number, l: number]>(),
 };
-const Color = construct<ColorVariants>();
-const variantArgs: ColorVariants = {
+
+const colorVariantSchemas: typeof identityColorVariantSchemas = {
+  Rgb: v.tuple([v.number(), v.number(), v.number()]),
+  RgbToHex: v.pipe(
+    v.tuple([v.number(), v.number(), v.number()]),
+    v.transform((rgb) => [rgbToHex(rgb)]),
+    v.tuple([v.string()]),
+  ),
+  Hex: v.tuple([v.string()]),
+  Hsl: v.tuple([v.number(), v.number(), v.number()]),
+};
+
+const variantInputs: StandardSchemaV1Dictionary.InferInput<
+  typeof identityColorVariantSchemas
+> = {
   Rgb: [0, 0, 0],
+  RgbToHex: [0, 0, 0],
   Hex: ["#000"],
   Hsl: [0, 0, 0],
 };
-const cases = Object.entries(variantArgs) as ReadonlyArray<
-  [keyof ColorVariants, ColorVariants[keyof ColorVariants]]
->;
-const variants = Object.keys(variantArgs) as ReadonlyArray<keyof ColorVariants>;
 
-describe("construct", () => {
-  it("should create an enum using a proxy", () => {
+const variantOutputs: StandardSchemaV1Dictionary.InferOutput<
+  typeof identityColorVariantSchemas
+> = {
+  Rgb: variantInputs.Rgb,
+  RgbToHex: ["#000"],
+  Hex: variantInputs.Hex,
+  Hsl: variantInputs.Hsl,
+};
+
+const cases = objectEntries(variantInputs);
+const variants = objectKeys(variantInputs);
+
+// wrapper to avoid typescript complaints
+function makeEnumValue<VariantMap extends UnknownVariantMap>(
+  en: Enum<VariantMap>,
+  variant: keyof VariantMap,
+  args: StandardSchemaV1.InferInput<VariantMap[keyof VariantMap]>,
+): EnumValue<VariantMap, keyof VariantMap> {
+  return en[variant](...args) as never;
+}
+
+describe.each([
+  ["with", colorVariantSchemas],
+  ["without", identityColorVariantSchemas],
+] as const)("construct %s validation", (name, variantSchemas) => {
+  const Color = construct(variantSchemas);
+  it("should create an enum", () => {
+    expect(Color[keys.id]).toBeTypeOf("string");
     for (const variant of variants) {
       expect(Color[variant]).toBeTypeOf("function");
     }
-
-    // @ts-expect-error testing invalid key
-    expect(Color.foo).toBeTypeOf("function");
-
-    expect(Color[keys.id]).toBeTypeOf("string");
   });
-  it("can pre-construct variants, without a proxy", () => {
-    const Color = construct<ColorVariants>({
-      Rgb: true,
-      Hex: true,
-      Hsl: true,
-    });
-
-    for (const variant of variants) {
-      expect(Color[variant]).toBeTypeOf("function");
-    }
-
-    // @ts-expect-error testing invalid key
-    expect(Color.foo).toBeUndefined();
-
-    expect(Color[keys.id]).toBeTypeOf("string");
+  it.each(cases)("should create a value for %s", (variant, args) => {
+    const value = makeEnumValue(Color, variant, args);
+    expect(value[keys.id]).toBe(Color[keys.id]);
+    expect(value[keys.variant]).toBe(variant);
+    expect(value.value).toEqual(variantOutputs[variant]);
   });
-  it("should cache enum variants", () => {
-    expect(Color.Rgb).toBe(Color.Rgb);
-  });
-  it.each(cases)("should create enum value: %s", (variant, values) => {
-    // @ts-expect-error contravariance
-    expect(Color[variant](...values)).toMatchObject({
-      [keys.id]: Color[keys.id],
-      [keys.variant]: variant,
-      values,
-    });
-  });
-  it.each(cases)("should match enum value: %s", (variant, values) => {
-    // @ts-expect-error contravariance
-    const value = Color[variant](...values);
-    expect(Color[variant].matches(value)).toBe(true);
-  });
-  it.each(cases)("should not match other enum value: %s", (variant, values) => {
-    // @ts-expect-error contravariance
-    const value = Color[variant](...values);
-    for (const otherVariant of variants) {
-      if (otherVariant === variant) continue;
-      expect(Color[otherVariant].matches(value)).toBe(false);
+  it.each(cases)("should match a value for %s", (variant, args) => {
+    const value = makeEnumValue(Color, variant, args);
+    for (const v of variants) {
+      expect(Color[v].matches(value)).toBe(v === variant);
     }
   });
-  it.each(cases)("should derive enum value: %s", (variant, values) => {
-    // @ts-expect-error contravariance
-    const value = Color[variant](...values);
-    expect(Color[variant].derive(value, () => "derived")).toBe("derived");
-  });
-  it.each(cases)(
-    "should not derive other enum value: %s",
-    (variant, values) => {
-      // @ts-expect-error contravariance
-      const value = Color[variant](...values);
-      for (const otherVariant of variants) {
-        if (otherVariant === variant) continue;
-        expect(
-          Color[otherVariant].derive(value, () => "derived"),
-        ).toBeUndefined();
+  const deriver = vi.fn(() => "derived");
+  it.each(cases)("should derive a value for %s", (variant, args) => {
+    const value = makeEnumValue(Color, variant, args);
+    for (const v of variants) {
+      const match = v === variant;
+      deriver.mockClear();
+      expect(Color[v].derive(value, deriver)).toBe(
+        match ? "derived" : undefined,
+      );
+      if (match) {
+        expect(deriver).toHaveBeenCalledWith(...variantOutputs[variant]);
+      } else {
+        expect(deriver).not.toHaveBeenCalled();
       }
-    },
-  );
+    }
+  });
 });
 
 describe("match", () => {
-  it.each(cases)("should match enum value: %s", (variant, values) => {
-    // @ts-expect-error contravariance
-    const value = Color[variant](...values);
-    // @ts-expect-error this is messy
-    expect(match(Color, value, { [variant]: () => "matched" })).toBe("matched");
-  });
-  it.each(cases)("should not match other enum value: %s", (variant, values) => {
-    // @ts-expect-error contravariance
-    const value = Color[variant](...values);
-    for (const otherVariant of variants) {
-      if (otherVariant === variant) continue;
-      expect(() =>
-        // @ts-expect-error this is messy
-        match(Color, value, { [otherVariant]: () => "matched" }),
-      ).toThrow();
+  const Color = construct(colorVariantSchemas);
+  const notMatched = vi.fn(() => "not matched");
+  const matchers = {
+    Rgb: notMatched,
+    RgbToHex: notMatched,
+    Hex: notMatched,
+    Hsl: notMatched,
+  };
+  const matched = vi.fn(() => "matched");
+  it.each(cases)("should match a value for %s", (variant, args) => {
+    const value = makeEnumValue(Color, variant, args);
+    for (const v of variants) {
+      notMatched.mockClear();
+      matched.mockClear();
+      const isMatch = v === variant;
+      expect(match(Color, value, { ...matchers, [v]: matched })).toBe(
+        isMatch ? "matched" : "not matched",
+      );
+      if (isMatch) {
+        expect(matched).toHaveBeenCalledWith(...variantOutputs[variant]);
+        expect(notMatched).not.toHaveBeenCalled();
+      } else {
+        expect(matched).not.toHaveBeenCalled();
+        expect(notMatched).toHaveBeenCalledWith(...variantOutputs[variant]);
+      }
     }
+  });
+  describe("should throw if", () => {
+    it("the value is not an enum value", () => {
+      expect(() => match(Color, {} as never, matchers)).toThrowError(
+        "Must be an enum value",
+      );
+    });
+    it("the enum id does not match", () => {
+      expect(() =>
+        match(
+          Color,
+          { [keys.id]: "other", [keys.variant]: "Rgb" } as never,
+          matchers,
+        ),
+      ).toThrowError("Enum mismatch");
+    });
+    it("the variant does not exist", () => {
+      expect(() =>
+        match(
+          Color,
+          { [keys.id]: Color[keys.id], [keys.variant]: "other" } as never,
+          matchers,
+        ),
+      ).toThrowError("No variant other");
+    });
+    it("the matcher does not exist", () => {
+      expect(() => match(Color, Color.Rgb(0, 0, 0), {} as never)).toThrowError(
+        "No matcher for variant Rgb",
+      );
+    });
   });
 });

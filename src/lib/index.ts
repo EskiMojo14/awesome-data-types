@@ -1,5 +1,7 @@
+import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { nanoid } from "nanoid/non-secure";
 import * as keys from "./keys";
+import { parseSync } from "./standard";
 import type {
   UnknownVariantMap,
   EnumValue,
@@ -12,12 +14,19 @@ import { assert } from "./utils";
 function makeEnumVariant<
   VariantMap extends UnknownVariantMap,
   Variant extends keyof VariantMap & string,
->(enumId: string, variant: Variant): EnumVariant<VariantMap, Variant> {
-  function construct(...values: VariantMap[Variant]) {
+>(
+  enumId: string,
+  variant: Variant,
+  schema: VariantMap[Variant],
+): EnumVariant<VariantMap, Variant> {
+  function construct(
+    ...input: StandardSchemaV1.InferInput<VariantMap[Variant]>
+  ): EnumValue<VariantMap, Variant> {
+    const result = parseSync(schema, input);
     return {
       [keys.id]: enumId,
       [keys.variant]: variant,
-      values,
+      value: result,
     };
   }
 
@@ -27,49 +36,40 @@ function makeEnumVariant<
     return value[keys.id] === enumId && value[keys.variant] === variant;
   }
 
+  function extract(value: UnknownEnumValue) {
+    if (matches(value)) {
+      return value.value;
+    }
+  }
+
   function derive<Derived>(
     value: UnknownEnumValue,
-    derive: (...values: VariantMap[Variant]) => Derived,
+    derive: (
+      ...values: StandardSchemaV1.InferOutput<VariantMap[Variant]>
+    ) => Derived,
   ) {
-    if (matches(value)) {
-      return derive(...(value.values as never));
-    }
+    const values = extract(value);
+    return values && derive(...values);
   }
 
   return Object.assign(construct, {
     matches,
+    extract,
     derive,
   });
 }
 
 export function construct<VariantMap extends UnknownVariantMap>(
-  variants?: Record<keyof VariantMap, true>,
+  variants: VariantMap,
 ): Enum<VariantMap> {
   const enumId = nanoid();
 
-  const target = {} as Enum<VariantMap>;
-  target[keys.id] = enumId;
+  const target: Record<string, unknown> = { [keys.id]: enumId };
 
-  // if we have runtime variants, we can pre-construct them
-  if (variants) {
-    for (const variant in variants) {
-      Reflect.set(target, variant, makeEnumVariant(enumId, variant));
-    }
-    return target;
+  for (const variant in variants) {
+    target[variant] = makeEnumVariant(enumId, variant, variants[variant]);
   }
-
-  // otherwise, we can use a proxy to construct them on demand
-  return new Proxy(target, {
-    get(cache, variant) {
-      if (variant === keys.id) return enumId;
-      if (typeof variant !== "string") return;
-      const cached = cache[variant];
-      if (cached) return cached;
-      const variantFn = makeEnumVariant(enumId, variant);
-      Reflect.set(cache, variant, variantFn);
-      return variantFn;
-    },
-  });
+  return target as never;
 }
 
 export function match<
@@ -81,14 +81,18 @@ export function match<
   value: EnumValue<NoInfer<VariantMap>, Variant>,
   matchers: {
     [V in keyof MatcherValues]: V extends Variant
-      ? (...values: VariantMap[V & Variant]) => MatcherValues[V]
+      ? (
+          ...values: StandardSchemaV1.InferOutput<VariantMap[V]>
+        ) => MatcherValues[V]
       : never;
   },
 ): MatcherValues[Variant] {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  assert(value?.[keys.id] && value[keys.variant], "Must be an enum value");
+  assert(en[keys.id] === value[keys.id], "Enum mismatch");
   const variant = value[keys.variant];
-  assert(variant, "Must be an enum value");
-  assert(en[variant].matches(value), "Variant mismatch");
+  assert(en[variant], "No variant " + String(variant));
   const matcher = matchers[variant];
   assert(matcher, "No matcher for variant " + String(variant));
-  return matcher(...(value.values as never));
+  return matcher(...value.value);
 }

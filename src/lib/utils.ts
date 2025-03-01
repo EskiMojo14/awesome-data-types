@@ -1,3 +1,7 @@
+export type NotNullish = NonNullable<unknown>;
+export type NonReducibleUnknown = NotNullish | null | undefined;
+export type LooseAutocomplete<T> = T | NonReducibleUnknown;
+
 export function assert(
   condition: unknown,
   message?: string,
@@ -6,3 +10,15 @@ export function assert(
     throw new Error(message);
   }
 }
+
+export const objectKeys = Object.keys as <Obj extends object>(
+  obj: Obj,
+) => Array<keyof Obj>;
+
+export const objectEntries = Object.entries as <Obj extends object>(
+  obj: Obj,
+) => Array<
+  {
+    [K in keyof Obj]: [K, Obj[K]];
+  }[keyof Obj]
+>;
