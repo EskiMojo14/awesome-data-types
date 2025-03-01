@@ -1,4 +1,5 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
+import { SchemaError } from "@standard-schema/utils";
 import * as v from "valibot";
 import { describe, expect, it, vi } from "vitest";
 import * as keys from "./keys";
@@ -65,7 +66,7 @@ function makeEnumValue<VariantMap extends UnknownVariantMap>(
 describe.each([
   ["with", colorVariantSchemas],
   ["without", identityColorVariantSchemas],
-] as const)("construct %s validation", (name, variantSchemas) => {
+] as const)("construct %s validation", (hasValidation, variantSchemas) => {
   const Color = construct(variantSchemas);
   it("should create an enum", () => {
     expect(Color[keys.id]).toBeTypeOf("string");
@@ -77,28 +78,19 @@ describe.each([
     const value = makeEnumValue(Color, variant, args);
     expect(value[keys.id]).toBe(Color[keys.id]);
     expect(value[keys.variant]).toBe(variant);
-    expect(value.value).toEqual(variantOutputs[variant]);
+    expect(value.values).toEqual(variantOutputs[variant]);
   });
+  if (hasValidation === "with") {
+    it("should throw if invalid", () => {
+      // @ts-expect-error testing invalid input
+      expect(() => Color.Hex(0, 0, 256)).toThrowError(SchemaError);
+    });
+  }
   it.each(cases)("should match a value for %s", (variant, args) => {
     const value = makeEnumValue(Color, variant, args);
+    expect(Color.matches(value)).toBe(true);
     for (const v of variants) {
       expect(Color[v].matches(value)).toBe(v === variant);
-    }
-  });
-  const deriver = vi.fn(() => "derived");
-  it.each(cases)("should derive a value for %s", (variant, args) => {
-    const value = makeEnumValue(Color, variant, args);
-    for (const v of variants) {
-      const match = v === variant;
-      deriver.mockClear();
-      expect(Color[v].derive(value, deriver)).toBe(
-        match ? "derived" : undefined,
-      );
-      if (match) {
-        expect(deriver).toHaveBeenCalledWith(...variantOutputs[variant]);
-      } else {
-        expect(deriver).not.toHaveBeenCalled();
-      }
     }
   });
 });

@@ -8,14 +8,34 @@ import type {
   UnknownEnumValue,
   EnumVariant,
   Enum,
+  EnumStatic,
+  VariantMatchers,
 } from "./types";
 import { assert } from "./utils";
+
+function matchesEnum<VariantMap extends UnknownVariantMap>(
+  en: EnumStatic<VariantMap>,
+  value: UnknownEnumValue,
+): value is EnumValue<VariantMap, keyof VariantMap & string> {
+  return value[keys.id] === en[keys.id];
+}
+
+function matchesVariant<
+  VariantMap extends UnknownVariantMap,
+  Variant extends keyof VariantMap & string,
+>(
+  en: EnumStatic<VariantMap>,
+  variant: Variant,
+  value: UnknownEnumValue,
+): value is EnumValue<VariantMap, Variant> {
+  return value[keys.id] === en[keys.id] && value[keys.variant] === variant;
+}
 
 function makeEnumVariant<
   VariantMap extends UnknownVariantMap,
   Variant extends keyof VariantMap & string,
 >(
-  enumId: string,
+  enumStatic: EnumStatic<VariantMap>,
   variant: Variant,
   schema: VariantMap[Variant],
 ): EnumVariant<VariantMap, Variant> {
@@ -24,52 +44,37 @@ function makeEnumVariant<
   ): EnumValue<VariantMap, Variant> {
     const result = parseSync(schema, input);
     return {
-      [keys.id]: enumId,
+      [keys.id]: enumStatic[keys.id],
       [keys.variant]: variant,
-      value: result,
+      values: result,
     };
   }
 
-  function matches(
-    value: UnknownEnumValue,
-  ): value is EnumValue<VariantMap, Variant> {
-    return value[keys.id] === enumId && value[keys.variant] === variant;
-  }
-
-  function extract(value: UnknownEnumValue) {
-    if (matches(value)) {
-      return value.value;
-    }
-  }
-
-  function derive<Derived>(
-    value: UnknownEnumValue,
-    derive: (
-      ...values: StandardSchemaV1.InferOutput<VariantMap[Variant]>
-    ) => Derived,
-  ) {
-    const values = extract(value);
-    return values && derive(...values);
-  }
-
   return Object.assign(construct, {
-    matches,
-    extract,
-    derive,
+    matches: (value: UnknownEnumValue) =>
+      matchesVariant(enumStatic, variant, value),
   });
 }
 
-export function construct<VariantMap extends UnknownVariantMap>(
+export function construct<const VariantMap extends UnknownVariantMap>(
   variants: VariantMap,
 ): Enum<VariantMap> {
-  const enumId = nanoid();
+  const enumStatic: EnumStatic<VariantMap> = {
+    [keys.id]: nanoid(),
+    matches: (value) => matchesEnum(enumStatic, value),
+  };
 
-  const target: Record<string, unknown> = { [keys.id]: enumId };
+  const target = enumStatic as Enum<VariantMap>;
 
   for (const variant in variants) {
-    target[variant] = makeEnumVariant(enumId, variant, variants[variant]);
+    target[variant] = makeEnumVariant(
+      enumStatic,
+      variant,
+      variants[variant],
+    ) as never;
   }
-  return target as never;
+
+  return target;
 }
 
 export function match<
@@ -79,20 +84,17 @@ export function match<
 >(
   en: Enum<VariantMap>,
   value: EnumValue<NoInfer<VariantMap>, Variant>,
-  matchers: {
-    [V in keyof MatcherValues]: V extends Variant
-      ? (
-          ...values: StandardSchemaV1.InferOutput<VariantMap[V]>
-        ) => MatcherValues[V]
-      : never;
-  },
+  matchers: VariantMatchers<VariantMap, Variant, MatcherValues>,
 ): MatcherValues[Variant] {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   assert(value?.[keys.id] && value[keys.variant], "Must be an enum value");
   assert(en[keys.id] === value[keys.id], "Enum mismatch");
+
   const variant = value[keys.variant];
   assert(en[variant], "No variant " + String(variant));
+
   const matcher = matchers[variant];
   assert(matcher, "No matcher for variant " + String(variant));
-  return matcher(...value.value);
+
+  return matcher(...value.values);
 }
