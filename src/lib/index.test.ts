@@ -63,7 +63,7 @@ const variants = objectKeys(variantInputs);
 
 // wrapper to avoid typescript complaints
 function makeADTValue<VariantMap extends UnknownVariantMap>(
-  adt: ADT<VariantMap>,
+  adt: ADT<string, VariantMap>,
   variant: keyof VariantMap,
   args: StandardSchemaV1.InferInput<VariantMap[keyof VariantMap]>,
 ): ADTValueFor<typeof adt> {
@@ -74,22 +74,23 @@ describe.each([
   ["without", identityColorVariantSchemas],
   ["with", colorVariantSchemas],
 ] as const)("construct %s validation", (hasValidation, variantSchemas) => {
-  const Color = construct(variantSchemas);
+  const Color = construct("Color", variantSchemas);
   it("should create an ADT", () => {
-    expect(Color[keys.id]).toBeTypeOf("string");
+    expect(Color[keys.name]).toBe("Color");
     for (const variant of variants) {
       expect(Color[variant]).toBeTypeOf("function");
       expect(Color[variant]).toEqual(
         expect.objectContaining<
-          Omit<ADTVariant<UnknownVariantMap, string, UnknownArraySchema>, never>
+          Omit<ADTVariant<string, string, UnknownArraySchema>, never>
         >({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           from: expect.typeOf("function"),
-          variant,
-          [keys.id]: Color[keys.id],
-          [keys.type]: "variant",
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           schema: expect.exactly(variantSchemas[variant]),
+          // dissuade
+          [keys.variant]: variant,
+          [keys.name]: Color[keys.name],
+          [keys.type]: "variant",
         }),
       );
     }
@@ -99,7 +100,7 @@ describe.each([
     expect(value).toEqual<UnknownADTValue>({
       variant,
       values: variantOutputs[variant],
-      [keys.id]: Color[keys.id],
+      [keys.name]: Color[keys.name],
       [keys.type]: "value",
     });
   });
@@ -116,7 +117,7 @@ describe.each([
       expect(value).toEqual<UnknownADTValue>({
         variant,
         values: args,
-        [keys.id]: Color[keys.id],
+        [keys.name]: Color[keys.name],
         [keys.type]: "value",
       });
     },
@@ -124,7 +125,7 @@ describe.each([
 });
 
 describe("isADTValue", () => {
-  const Color = construct(colorVariantSchemas);
+  const Color = construct("Color", colorVariantSchemas);
   it("should match", () => {
     for (const [variant, args] of cases) {
       const value = makeADTValue(Color, variant, args);
@@ -144,7 +145,7 @@ describe("isADTValue", () => {
 });
 
 describe("matches", () => {
-  const Color = construct(colorVariantSchemas);
+  const Color = construct("Color", colorVariantSchemas);
   it("should match", () => {
     for (const [variant, args] of cases) {
       const value = makeADTValue(Color, variant, args);
@@ -154,7 +155,7 @@ describe("matches", () => {
 });
 
 describe("match", () => {
-  const Color = construct(colorVariantSchemas);
+  const Color = construct("Color", colorVariantSchemas);
   const red = Color.Rgb(255, 0, 0);
   it("should match", () => {
     expect(

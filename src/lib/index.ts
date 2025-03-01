@@ -1,5 +1,4 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { nanoid } from "nanoid/non-secure";
 import * as keys from "./keys";
 import { parseSync } from "./standard";
 import type {
@@ -15,22 +14,22 @@ import type {
 import { assert } from "./utils";
 
 function makeADTVariant<
-  VariantMap extends UnknownVariantMap,
-  Variant extends keyof VariantMap & string,
-  VariantSchema extends VariantMap[Variant],
+  Name extends string,
+  Variant extends string,
+  VariantSchema extends UnknownArraySchema,
 >(
-  adtStatic: ADTStatic,
+  adtStatic: ADTStatic<Name, UnknownVariantMap>,
   variant: Variant,
   schema: VariantSchema,
-): ADTVariant<VariantMap, Variant, VariantSchema> {
+): ADTVariant<Name, Variant, VariantSchema> {
   function from(
     input: StandardSchemaV1.InferOutput<VariantSchema>,
-  ): ADTValue<VariantMap, Variant, VariantSchema> {
+  ): ADTValue<Name, Variant, VariantSchema> {
     return {
       values: input,
       variant,
-      // internal
-      [keys.id]: adtStatic[keys.id],
+      // dissuade
+      [keys.name]: adtStatic[keys.name],
       [keys.type]: "value",
     };
   }
@@ -38,31 +37,31 @@ function makeADTVariant<
   return Object.assign(
     function parse(
       ...input: StandardSchemaV1.InferInput<VariantSchema>
-    ): ADTValue<VariantMap, Variant, VariantSchema> {
+    ): ADTValue<Name, Variant, VariantSchema> {
       return from(parseSync(schema, input));
     },
     {
       from: (...args: StandardSchemaV1.InferOutput<VariantSchema>) =>
         from(args),
       schema,
-      variant,
-      // internal
-      [keys.id]: adtStatic[keys.id],
+      // dissuade
+      [keys.name]: adtStatic[keys.name],
+      [keys.variant]: variant,
       [keys.type]: "variant" as const,
     },
   );
 }
 
-export function construct<const VariantMap extends UnknownVariantMap>(
-  variants: VariantMap,
-): ADT<VariantMap> {
-  const adtStatic: ADTStatic = {
-    // internal
-    [keys.id]: nanoid(),
+export function construct<
+  const Name extends string,
+  const VariantMap extends UnknownVariantMap,
+>(name: Name, variants: VariantMap): ADT<Name, VariantMap> {
+  const adtStatic: ADTStatic<Name, VariantMap> = {
+    [keys.name]: name,
     [keys.type]: "ADT",
   };
 
-  const target = adtStatic as ADT<VariantMap>;
+  const target = adtStatic as ADT<Name, VariantMap>;
 
   for (const variant in variants) {
     target[variant] = makeADTVariant(
@@ -76,55 +75,57 @@ export function construct<const VariantMap extends UnknownVariantMap>(
 }
 
 export function matches<
-  VariantMap extends UnknownVariantMap,
-  Variant extends keyof VariantMap & string,
-  VariantSchema extends VariantMap[Variant],
+  Name extends string,
+  Variant extends string,
+  VariantSchema extends UnknownArraySchema,
 >(
-  variant: ADTVariant<VariantMap, Variant, VariantSchema>,
+  variant: ADTVariant<Name, Variant, VariantSchema>,
   value: UnknownADTValue,
-): value is ADTValue<VariantMap, Variant, VariantSchema>;
-export function matches<VariantMap extends UnknownVariantMap>(
-  adt: ADT<VariantMap>,
+): value is ADTValue<Name, Variant, VariantSchema>;
+export function matches<
+  Name extends string,
+  VariantMap extends UnknownVariantMap,
+>(
+  adt: ADT<Name, VariantMap>,
   value: UnknownADTValue,
-): value is ADTValueFor<ADT<VariantMap>>;
+): value is ADTValueFor<ADT<Name, VariantMap>>;
 export function matches(
   adtOrVariant:
-    | ADT<UnknownVariantMap>
-    | ADTVariant<UnknownVariantMap, string, UnknownArraySchema>,
+    | ADT<string, UnknownVariantMap>
+    | ADTVariant<string, string, UnknownArraySchema>,
   value: UnknownADTValue,
 ) {
-  const ADTMatches = adtOrVariant[keys.id] === value[keys.id];
+  const nameMatches = adtOrVariant[keys.name] === value[keys.name];
   return adtOrVariant[keys.type] === "variant"
-    ? ADTMatches && adtOrVariant.variant === value.variant
-    : ADTMatches;
+    ? nameMatches && adtOrVariant[keys.variant] === value.variant
+    : nameMatches;
 }
 
 export function match<
-  VariantMap extends UnknownVariantMap,
-  Variant extends keyof VariantMap & string,
-  MatchResults extends Record<Variant, unknown>,
+  Value extends UnknownADTValue,
+  MatcherResults extends Record<Value["variant"], unknown>,
 >(
-  value: ADTValue<VariantMap, Variant, VariantMap[Variant]>,
+  value: Value,
   cases: {
-    [V in keyof MatchResults]: V extends Variant
-      ? (
-          ...args: StandardSchemaV1.InferOutput<VariantMap[V]>
-        ) => MatchResults[V]
-      : never;
-  },
-): MatchResults[Variant] {
+    [V in keyof MatcherResults]: (
+      ...args: Extract<Value, { variant: V }>["values"]
+    ) => MatcherResults[V];
+  } & Record<Exclude<keyof MatcherResults, Value["variant"]>, never>,
+): MatcherResults[Value["variant"]] {
   const variant = value.variant;
   assert(variant, "value must be an ADT value");
-  const matcher = cases[variant];
+  const matcher = cases[variant as Value["variant"]] as (
+    ...values: Value["values"]
+  ) => MatcherResults[typeof variant];
   assert(matcher, `missing case for ${variant}`);
-  return cases[variant](...value.values);
+  return matcher(...value.values);
 }
 
 export function isADTValue(value: unknown): value is UnknownADTValue {
   return (
     typeof value === "object" &&
     value !== null &&
-    keys.id in value &&
+    keys.name in value &&
     keys.type in value &&
     value[keys.type] === "value"
   );

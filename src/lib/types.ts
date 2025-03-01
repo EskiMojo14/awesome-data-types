@@ -2,77 +2,82 @@ import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type * as keys from "./keys";
 
 export interface ADTValue<
-  VariantMap extends UnknownVariantMap,
-  Variant extends keyof VariantMap & string,
-  VariantSchema extends VariantMap[Variant],
+  Name extends string,
+  Variant extends string,
+  VariantSchema extends UnknownArraySchema,
 > {
   readonly values: StandardSchemaV1.InferOutput<VariantSchema>;
   readonly variant: Variant;
-  // internal
-  [keys.id]: string;
-  [keys.type]: "value";
-  // type-only
-  [keys.variantMap]?: VariantMap;
+  // dissuade
+  readonly [keys.name]: Name;
+  readonly [keys.type]: "value";
 }
 
 export type UnknownArraySchema = StandardSchemaV1<ReadonlyArray<unknown>>;
 
 export type UnknownVariantMap = Record<string, UnknownArraySchema> &
-  Partial<Record<keyof ADTStatic, never>>;
+  Partial<Record<keyof ADTStatic<any, any>, never>>;
 
-export type UnknownADTValue = ADTValue<
-  UnknownVariantMap,
-  string,
-  UnknownArraySchema
->;
+export type UnknownADTValue = ADTValue<string, string, UnknownArraySchema>;
 
 export interface ADTVariant<
-  VariantMap extends UnknownVariantMap,
-  Variant extends keyof VariantMap & string,
-  VariantSchema extends VariantMap[Variant],
+  Name extends string,
+  Variant extends string,
+  VariantSchema extends UnknownArraySchema,
 > {
   /** parse and validate */
   (
     ...values: StandardSchemaV1.InferInput<VariantSchema>
-  ): ADTValue<VariantMap, Variant, VariantSchema>;
+  ): ADTValue<Name, Variant, VariantSchema>;
   /** skip parsing */
   from(
     ...values: StandardSchemaV1.InferOutput<VariantSchema>
-  ): ADTValue<VariantMap, Variant, VariantSchema>;
+  ): ADTValue<Name, Variant, VariantSchema>;
 
   readonly schema: VariantSchema;
-  readonly variant: Variant;
 
-  // internal
-  [keys.id]: string;
-  [keys.type]: "variant";
-  // type-only
-  [keys.variantMap]?: VariantMap;
+  // dissuade
+  readonly [keys.variant]: Variant;
+  readonly [keys.name]: Name;
+  readonly [keys.type]: "variant";
 }
 
-export type ADTVariants<VariantMap extends UnknownVariantMap> = {
+export type ADTVariants<
+  Name extends string,
+  VariantMap extends UnknownVariantMap,
+> = {
   [Variant in keyof VariantMap & string]: ADTVariant<
-    VariantMap,
+    Name,
     Variant,
     VariantMap[Variant]
   >;
 };
 
-export interface ADTStatic {
-  // internal
-  [keys.id]: string;
-  [keys.type]: "ADT";
+export interface ADTStatic<
+  Name extends string,
+  VariantMap extends UnknownVariantMap,
+> {
+  // dissuade
+  readonly [keys.name]: Name;
+  readonly [keys.type]: "ADT";
+  // type-only
+  [keys.types]?: {
+    variantMap: VariantMap;
+  };
 }
 
-export type ADT<VariantMap extends UnknownVariantMap> =
-  ADTVariants<VariantMap> & ADTStatic;
+export type ADT<
+  Name extends string,
+  VariantMap extends UnknownVariantMap,
+> = ADTVariants<Name, VariantMap> & ADTStatic<Name, VariantMap>;
 
-export type ADTVariantMap<E extends ADT<any>> =
-  E extends ADT<infer VariantMap> ? VariantMap : never;
+export type ADTVariantMap<E extends ADT<any, any>> = NonNullable<
+  E[typeof keys.types]
+>["variantMap"];
 
-export type ADTValueFor<E extends ADT<any>> = {
+export type ADTValueFor<E extends ADT<any, any>> = {
   [Variant in keyof ADTVariantMap<E> & string]: ADTValue<
-    ADTVariantMap<E>,
+    E[typeof keys.name],
     Variant,
     ADTVariantMap<E>[Variant]
   >;

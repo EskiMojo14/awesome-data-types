@@ -6,7 +6,7 @@ import { construct, matches, match } from "./index";
 
 declare function rgbToHex(rgb: [number, number, number]): string;
 
-const Color = construct({
+const Color = construct("Color", {
   Rgb: identity<[r: number, g: number, b: number]>(),
   Hex: identity<[hex: string]>(),
   Hsl: identity<[h: number, s: number, l: number]>(),
@@ -32,7 +32,7 @@ describe("construct", () => {
   it("preserves schema type accurately", () => {
     const someSchema = v.tuple([v.number()]);
     const noneSchema = v.tuple([]);
-    const Option = construct({
+    const Option = construct("Option", {
       Some: someSchema,
       None: noneSchema,
     });

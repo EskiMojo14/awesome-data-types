@@ -13,7 +13,7 @@ import type { ADTValueFor, UnknownADTValue } from "awesome-data-types";
 import { construct, matches, identity, transform } from "awesome-data-types";
 
 // for runtime validation
-const Color = construct({
+const Color = construct("Color", {
   Rgb: v.tuple([v.number(), v.number(), v.number()]),
   Hex: v.tuple([v.string()]),
   Hsl: v.tuple([v.number(), v.number(), v.number()]),
@@ -26,7 +26,7 @@ const Color = construct({
 });
 
 // or for compile time only validation
-const Color = construct({
+const Color = construct("Color", {
   Rgb: identity<[r: number, g: number, b: number]>(),
   Hex: identity<[hex: string]>(),
   Hsl: identity<[h: number, s: number, l: number]>(),
@@ -78,10 +78,10 @@ function handleColor(color: Color) {
 
 ### `construct`
 
-Creates an ADT from a map of variant schemas. Note that each variant must be an array schema.
+Creates an ADT from a map of variant schemas. Note that each variant must be an array schema. First parameter is the name of the ADT, which should be unique.
 
 ```ts
-const Color = construct({
+const Color = construct("Color", {
   Rgb: identity<[r: number, g: number, b: number]>(),
   Hex: identity<[hex: string]>(),
   Hsl: identity<[h: number, s: number, l: number]>(),
@@ -172,7 +172,7 @@ schema["~standard"].validate(1); // { value: 2 }
 Take a tuple schema and add labels to the items. Useful when using a schema library, since by default tuple items will just be labeled `arg_n`.
 
 ```ts
-const Color = construct({
+const Color = construct("Color", {
   RgbWithoutLabel: rgbSchema,
   RgbWithLabel: labelArgs<[r: number, g: number, b: number]>()(rgbSchema),
 });
