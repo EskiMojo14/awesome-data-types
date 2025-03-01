@@ -1,6 +1,7 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { SchemaError } from "@standard-schema/utils";
-import type { LooseAutocomplete } from "./utils";
+import type { UnknownArraySchema } from "./types";
+import type { LooseAutocomplete, Override } from "./utils";
 
 /**
  * Creates a schema that transforms the value.
@@ -23,14 +24,26 @@ export const identity = <T>(): StandardSchemaV1<T> => transform((x) => x);
 /**
  * Take a tuple schema and add labels to the arguments.
  */
-export const labelArgs = <
+export function labelArgs<
+  InputArgs extends ReadonlyArray<unknown>,
+  OutputArgs extends {
+    [K in keyof InputArgs]: unknown;
+  } = InputArgs,
+>(): <Schema extends StandardSchemaV1<InputArgs, OutputArgs>>(
+  schema: Schema,
+) => Override<Schema, StandardSchemaV1<InputArgs, OutputArgs>>;
+export function labelArgs<
   InputArgs extends ReadonlyArray<unknown>,
   OutputArgs extends {
     [K in keyof InputArgs]: unknown;
   } = InputArgs,
 >(
   schema: StandardSchemaV1<InputArgs, OutputArgs>,
-) => schema;
+): StandardSchemaV1<InputArgs, OutputArgs>;
+export function labelArgs(schema?: UnknownArraySchema) {
+  if (schema) return schema;
+  return (schema: UnknownArraySchema) => schema;
+}
 
 export function parseSync<Schema extends StandardSchemaV1>(
   schema: Schema,

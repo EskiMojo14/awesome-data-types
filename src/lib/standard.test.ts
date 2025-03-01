@@ -19,8 +19,8 @@ describe("transform", () => {
 describe("labelArgs", () => {
   it("should return the schema", () => {
     const baseSchema = identity<[1, 2, 3]>();
-    const schema = labelArgs(baseSchema);
-    expect(schema).toBe(baseSchema);
+    expect(labelArgs(baseSchema)).toBe(baseSchema);
+    expect(labelArgs()(baseSchema)).toBe(baseSchema);
   });
 });
 
