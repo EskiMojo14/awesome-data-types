@@ -11,6 +11,7 @@ import type {
   ADTValueFor,
   ADTVariant,
   UnknownArraySchema,
+  UnknownADTValue,
 } from "./types";
 import { objectEntries, objectKeys } from "./utils";
 import { construct, match, matches } from "./index";
@@ -95,7 +96,7 @@ describe.each([
   });
   it.each(cases)("should create a value for %s", (variant, args) => {
     const value = makeADTValue(Color, variant, args);
-    expect(value).toEqual<ADTValueFor<typeof Color>>({
+    expect(value).toEqual<UnknownADTValue>({
       [keys.id]: Color[keys.id],
       [keys.type]: "value",
       [keys.variant]: variant,
@@ -112,7 +113,7 @@ describe.each([
     "should create a value from %s",
     (variant, args) => {
       const value = Color[variant].from(...(args as unknown as Array<never>));
-      expect(value).toEqual<ADTValueFor<typeof Color>>({
+      expect(value).toEqual<UnknownADTValue>({
         [keys.id]: Color[keys.id],
         [keys.type]: "value",
         [keys.variant]: variant,

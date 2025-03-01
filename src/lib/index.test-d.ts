@@ -14,6 +14,7 @@ const Color = construct({
     (rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)],
   ),
 });
+type Color = ADTValueFor<typeof Color>;
 
 it("provides utils", () => {
   expectTypeOf<ValueOf<typeof Color.HexFromRgb>>().toEqualTypeOf<
@@ -25,7 +26,7 @@ it("provides utils", () => {
 });
 
 declare const unknownValue: UnknownADTValue;
-declare const colorValue: ADTValueFor<typeof Color>;
+declare const colorValue: Color;
 
 describe("construct", () => {
   it("preserves schema type accurately", () => {
@@ -43,7 +44,7 @@ describe("construct", () => {
 describe("matches", () => {
   it("should act as type guard", () => {
     if (matches(Color, unknownValue)) {
-      expectTypeOf(unknownValue).toEqualTypeOf<ADTValueFor<typeof Color>>();
+      expectTypeOf(unknownValue).toEqualTypeOf<Color>();
       expectTypeOf(unknownValue.values).toEqualTypeOf<
         | [r: number, g: number, b: number]
         | [hex: string]

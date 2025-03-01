@@ -70,11 +70,13 @@ export type ADT<VariantMap extends UnknownVariantMap> =
 export type ADTVariantMap<E extends ADT<any>> =
   E extends ADT<infer VariantMap> ? VariantMap : never;
 
-export type ADTValueFor<E extends ADT<any>> = ADTValue<
-  ADTVariantMap<E>,
-  keyof ADTVariantMap<E> & string,
-  ADTVariantMap<E>[keyof ADTVariantMap<E>]
->;
+export type ADTValueFor<E extends ADT<any>> = {
+  [Variant in keyof ADTVariantMap<E> & string]: ADTValue<
+    ADTVariantMap<E>,
+    Variant,
+    ADTVariantMap<E>[Variant]
+  >;
+}[keyof ADTVariantMap<E> & string];
 
 export type ValueOf<T extends { schema: UnknownArraySchema }> =
   StandardSchemaV1.InferOutput<T["schema"]>;
