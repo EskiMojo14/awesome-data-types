@@ -22,11 +22,16 @@ export interface EnumVariant<
   Variant extends string,
   VariantSchema extends StandardSchemaV1<ReadonlyArray<unknown>>,
 > {
+  /** parse and validate */
   (
     ...values: StandardSchemaV1.InferInput<VariantSchema>
   ): EnumValue<Variant, VariantSchema>;
-
+  /** check if value is of this variant */
   matches(value: UnknownEnumValue): value is EnumValue<Variant, VariantSchema>;
+  /** skip parsing */
+  from(
+    ...values: StandardSchemaV1.InferOutput<VariantSchema>
+  ): EnumValue<Variant, VariantSchema>;
 }
 
 export type EnumVariants<VariantMap extends UnknownVariantMap> = {

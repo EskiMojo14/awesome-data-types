@@ -86,6 +86,15 @@ describe.each([
       expect(() => Color.Hex(0, 0, 256)).toThrowError(SchemaError);
     });
   }
+  it.each(objectEntries(variantOutputs))(
+    "should create a value from %s",
+    (variant, args) => {
+      const value = Color[variant].from(...(args as unknown as never[]));
+      expect(value[keys.id]).toBe(Color[keys.id]);
+      expect(value[keys.variant]).toBe(variant);
+      expect(value.values).toEqual(args);
+    },
+  );
   it.each(cases)("should match a value for %s", (variant, args) => {
     const value = makeEnumValue(Color, variant, args);
     expect(Color.matches(value)).toBe(true);

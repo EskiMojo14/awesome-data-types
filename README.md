@@ -1,11 +1,11 @@
-# wheenums
+# awesome-data-types
 
 A library for creating ADT enums in TypeScript. Uses Standard Schemas for runtime validation.
 
 ```ts
 import * as v from "valibot";
 import { rgbToHex } from "./utils";
-import { construct, match, identity, transform } from "wheenums";
+import { construct, match, identity, transform } from "awesome-data-types";
 
 // for compile time only validation
 const Color = construct({
@@ -35,6 +35,9 @@ const red = Color.Rgb(255, 0, 0);
 const green = Color.Hex("#00ff00");
 const blue = Color.Hsl(240, 100, 50);
 const purple = Color.HexFromRgb(128, 0, 128);
+
+// construct without validation or transformation
+const purple2 = Color.HexFromRgb.from("#800080");
 
 // basic matching
 if (Color.matches(red)) {

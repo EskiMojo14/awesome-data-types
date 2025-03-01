@@ -10,7 +10,7 @@ export const transform = <T, U>(
 ): StandardSchemaV1<T, U> => ({
   "~standard": {
     version: 1,
-    vendor: "wheenums",
+    vendor: "awesome-data-types",
     validate: (value) => ({ value: transform(value as T) }),
   },
 });

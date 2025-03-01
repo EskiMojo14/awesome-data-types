@@ -40,21 +40,29 @@ function makeEnumVariant<
   variant: Variant,
   schema: VariantMap[Variant],
 ): EnumVariant<Variant, VariantMap[Variant]> {
-  function construct(
-    ...input: StandardSchemaV1.InferInput<VariantMap[Variant]>
+  function from(
+    input: StandardSchemaV1.InferOutput<VariantMap[Variant]>,
   ): EnumValue<Variant, VariantMap[Variant]> {
-    const result = parseSync(schema, input);
     return {
       [keys.id]: enumStatic[keys.id],
       [keys.variant]: variant,
-      values: result,
+      values: input,
     };
   }
 
-  return Object.assign(construct, {
-    matches: (value: UnknownEnumValue) =>
-      matchesVariant(enumStatic, variant, value),
-  });
+  return Object.assign(
+    function parse(
+      ...input: StandardSchemaV1.InferInput<VariantMap[Variant]>
+    ): EnumValue<Variant, VariantMap[Variant]> {
+      return from(parseSync(schema, input));
+    },
+    {
+      matches: (value: UnknownEnumValue) =>
+        matchesVariant(enumStatic, variant, value),
+      from: (...args: StandardSchemaV1.InferOutput<VariantMap[Variant]>) =>
+        from(args),
+    },
+  );
 }
 
 export function construct<const VariantMap extends UnknownVariantMap>(

@@ -33,7 +33,7 @@ describe("parseSync", () => {
     const asyncSchema: StandardSchemaV1 = {
       "~standard": {
         version: 1,
-        vendor: "wheenums",
+        vendor: "awesome-data-types",
         validate: (value) => Promise.resolve({ value }),
       },
     };
@@ -45,7 +45,7 @@ describe("parseSync", () => {
     const failSchema: StandardSchemaV1 = {
       "~standard": {
         version: 1,
-        vendor: "wheenums",
+        vendor: "awesome-data-types",
         validate: () => ({ issues: [] }),
       },
     };
