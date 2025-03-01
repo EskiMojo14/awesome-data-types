@@ -76,7 +76,7 @@ export function construct<
 
 export function matches<
   Name extends string,
-  Variant extends string,
+  Variant extends PropertyKey,
   VariantSchema extends UnknownArraySchema,
 >(
   variant: AdtVariant<Name, Variant, VariantSchema>,
@@ -91,8 +91,8 @@ export function matches<
 ): value is AdtValueFor<Adt<Name, VariantMap>>;
 export function matches(
   adtOrVariant:
-    | Adt<string, UnknownVariantMap>
-    | AdtVariant<string, string, UnknownArraySchema>,
+    | Adt<string, any>
+    | AdtVariant<string, PropertyKey, UnknownArraySchema>,
   value: UnknownAdtValue,
 ) {
   const nameMatches = adtOrVariant[keys.name] === value[keys.name];
@@ -105,20 +105,19 @@ export function match<
   Value extends UnknownAdtValue,
   MatcherResults extends Record<Value["variant"], unknown>,
 >(
-  value: Value,
+  { values, variant }: Value,
   cases: {
     [V in keyof MatcherResults]: (
       ...args: Extract<Value, { variant: V }>["values"]
     ) => MatcherResults[V];
   } & Record<Exclude<keyof MatcherResults, Value["variant"]>, never>,
 ): MatcherResults[Value["variant"]] {
-  const variant = value.variant;
   assert(variant, "value must be an ADT value");
   const matcher = cases[variant as Value["variant"]] as (
     ...values: Value["values"]
   ) => MatcherResults[typeof variant];
-  assert(matcher, `missing case for ${variant}`);
-  return matcher(...value.values);
+  assert(matcher, `missing case for ${String(variant)}`);
+  return matcher(...values);
 }
 
 export function isAdtValue(value: unknown): value is UnknownAdtValue {
