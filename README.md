@@ -93,6 +93,12 @@ const blue = Color.RgbToHex.from("#0000ff");
 console.log(blue.values); // ["#0000ff"]
 ```
 
+Schemas are attached to each variant.
+
+```ts
+Color.Rgb.schema["~standard"].validate([1, 2, 3]); // { value: [1, 2, 3] }
+```
+
 ### `matches`
 
 Checks if a value is an ADT value.
