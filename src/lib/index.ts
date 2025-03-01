@@ -12,18 +12,20 @@ import type {
   UnknownEnumValue,
   UnknownVariantMap,
 } from "./types";
+import { assert } from "./utils";
 
 function makeEnumVariant<
   Variant extends string,
   VariantSchema extends UnknownArraySchema,
+  VariantMap extends UnknownVariantMap,
 >(
   enumStatic: EnumStatic,
   variant: Variant,
   schema: VariantSchema,
-): EnumVariant<Variant, VariantSchema> {
+): EnumVariant<Variant, VariantSchema, VariantMap> {
   function from(
     input: StandardSchemaV1.InferOutput<VariantSchema>,
-  ): EnumValue<Variant, VariantSchema> {
+  ): EnumValue<Variant, VariantSchema, VariantMap> {
     return {
       [keys.type]: "value",
       [keys.id]: enumStatic[keys.id],
@@ -35,7 +37,7 @@ function makeEnumVariant<
   return Object.assign(
     function parse(
       ...input: StandardSchemaV1.InferInput<VariantSchema>
-    ): EnumValue<Variant, VariantSchema> {
+    ): EnumValue<Variant, VariantSchema, VariantMap> {
       return from(parseSync(schema, input));
     },
     {
@@ -73,22 +75,42 @@ export function construct<const VariantMap extends UnknownVariantMap>(
 export function matches<
   Variant extends string,
   VariantSchema extends UnknownArraySchema,
+  VariantMap extends UnknownVariantMap,
 >(
-  variant: EnumVariant<Variant, VariantSchema>,
+  variant: EnumVariant<Variant, VariantSchema, VariantMap>,
   value: UnknownEnumValue,
-): value is EnumValue<Variant, VariantSchema>;
+): value is EnumValue<Variant, VariantSchema, VariantMap>;
 export function matches<VariantMap extends UnknownVariantMap>(
-  en: Enum<VariantMap>,
+  en: Enum<VariantMap> | EnumVariant<string, UnknownArraySchema, VariantMap>,
   value: UnknownEnumValue,
 ): value is EnumValueFor<Enum<VariantMap>>;
 export function matches(
   enOrVariant:
     | Enum<UnknownVariantMap>
-    | EnumVariant<string, UnknownArraySchema>,
+    | EnumVariant<string, UnknownArraySchema, UnknownVariantMap>,
   value: UnknownEnumValue,
 ) {
   const enumMatches = enOrVariant[keys.id] === value[keys.id];
   return enOrVariant[keys.type] === "variant"
     ? enumMatches && enOrVariant[keys.variant] === value[keys.variant]
     : enumMatches;
+}
+
+export function match<
+  VariantMap extends UnknownVariantMap,
+  Variant extends keyof VariantMap & string,
+  MatchResults extends Record<NoInfer<Variant>, unknown>,
+>(
+  value: EnumValue<Variant, VariantMap[Variant], VariantMap>,
+  cases: {
+    [V in Variant]: (
+      ...args: StandardSchemaV1.InferOutput<VariantMap[V]>
+    ) => MatchResults[V];
+  },
+): MatchResults[Variant] {
+  const variant = value[keys.variant];
+  assert(variant, "value must be an enum value");
+  const matcher = cases[variant];
+  assert(matcher, `missing case for ${variant}`);
+  return cases[variant](...value.values);
 }

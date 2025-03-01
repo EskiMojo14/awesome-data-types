@@ -48,4 +48,11 @@ if (matches(Color.Rgb, red)) {
   // red is a Color.Rgb
   color.values; // [255, 0, 0]
 }
+
+// pattern matching
+const colorString = match(red, {
+  Rgb: (r, g, b) => `rgb(${r}, ${g}, ${b})`,
+  Hex: (hex) => hex,
+  Hsl: (h, s, l) => `hsl(${h}, ${s}%, ${l}%)`,
+});
 ```
