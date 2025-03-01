@@ -1,11 +1,11 @@
 export type {
-  Enum,
-  EnumValue,
-  EnumVariant,
+  ADT,
+  ADTValue,
+  ADTVariant,
   UnknownVariantMap,
-  UnknownEnumValue,
-  EnumVariantMap,
-  EnumValueFor,
+  UnknownADTValue,
+  ADTVariantMap,
+  ADTValueFor,
 } from "./lib/types";
 export { construct, match } from "./lib";
 export { transform, identity, labelArgs } from "./lib/standard";

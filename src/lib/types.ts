@@ -1,7 +1,7 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type * as keys from "./keys";
 
-export interface EnumValue<
+export interface ADTValue<
   Variant extends string,
   VariantSchema extends StandardSchemaV1,
   VariantMap extends UnknownVariantMap,
@@ -18,15 +18,15 @@ export interface EnumValue<
 export type UnknownArraySchema = StandardSchemaV1<ReadonlyArray<unknown>>;
 
 export type UnknownVariantMap = Record<string, UnknownArraySchema> &
-  Partial<Record<keyof EnumStatic, never>>;
+  Partial<Record<keyof ADTStatic, never>>;
 
-export type UnknownEnumValue = EnumValue<
+export type UnknownADTValue = ADTValue<
   string,
   StandardSchemaV1,
   UnknownVariantMap
 >;
 
-export interface EnumVariant<
+export interface ADTVariant<
   Variant extends string,
   VariantSchema extends UnknownArraySchema,
   VariantMap extends UnknownVariantMap,
@@ -34,11 +34,11 @@ export interface EnumVariant<
   /** parse and validate */
   (
     ...values: StandardSchemaV1.InferInput<VariantSchema>
-  ): EnumValue<Variant, VariantSchema, VariantMap>;
+  ): ADTValue<Variant, VariantSchema, VariantMap>;
   /** skip parsing */
   from(
     ...values: StandardSchemaV1.InferOutput<VariantSchema>
-  ): EnumValue<Variant, VariantSchema, VariantMap>;
+  ): ADTValue<Variant, VariantSchema, VariantMap>;
 
   readonly schema: VariantSchema;
 
@@ -50,27 +50,28 @@ export interface EnumVariant<
   [keys.variantMap]?: VariantMap;
 }
 
-export type EnumVariants<VariantMap extends UnknownVariantMap> = {
-  [Variant in keyof VariantMap & string]: EnumVariant<
+export type ADTVariants<VariantMap extends UnknownVariantMap> = {
+  [Variant in keyof VariantMap & string]: ADTVariant<
     Variant,
     VariantMap[Variant],
     VariantMap
   >;
 };
 
-export interface EnumStatic {
-  [keys.type]: "enum";
+export interface ADTStatic {
+  // internal
+  [keys.type]: "ADT";
   [keys.id]: string;
 }
 
-export type Enum<VariantMap extends UnknownVariantMap> =
-  EnumVariants<VariantMap> & EnumStatic;
+export type ADT<VariantMap extends UnknownVariantMap> =
+  ADTVariants<VariantMap> & ADTStatic;
 
-export type EnumVariantMap<E extends Enum<any>> =
-  E extends Enum<infer VariantMap> ? VariantMap : never;
+export type ADTVariantMap<E extends ADT<any>> =
+  E extends ADT<infer VariantMap> ? VariantMap : never;
 
-export type EnumValueFor<E extends Enum<any>> = EnumValue<
-  keyof EnumVariantMap<E> & string,
-  EnumVariantMap<E>[keyof EnumVariantMap<E>],
-  EnumVariantMap<E>
+export type ADTValueFor<E extends ADT<any>> = ADTValue<
+  keyof ADTVariantMap<E> & string,
+  ADTVariantMap<E>[keyof ADTVariantMap<E>],
+  ADTVariantMap<E>
 >;

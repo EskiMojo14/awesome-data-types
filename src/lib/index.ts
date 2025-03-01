@@ -3,48 +3,50 @@ import { nanoid } from "nanoid/non-secure";
 import * as keys from "./keys";
 import { parseSync } from "./standard";
 import type {
-  Enum,
-  EnumStatic,
-  EnumValue,
-  EnumValueFor,
-  EnumVariant,
+  ADT,
+  ADTStatic,
+  ADTValue,
+  ADTValueFor,
+  ADTVariant,
   UnknownArraySchema,
-  UnknownEnumValue,
+  UnknownADTValue,
   UnknownVariantMap,
 } from "./types";
 import { assert } from "./utils";
 
-function makeEnumVariant<
+function makeADTVariant<
   Variant extends string,
   VariantSchema extends UnknownArraySchema,
   VariantMap extends UnknownVariantMap,
 >(
-  enumStatic: EnumStatic,
+  adtStatic: ADTStatic,
   variant: Variant,
   schema: VariantSchema,
-): EnumVariant<Variant, VariantSchema, VariantMap> {
+): ADTVariant<Variant, VariantSchema, VariantMap> {
   function from(
     input: StandardSchemaV1.InferOutput<VariantSchema>,
-  ): EnumValue<Variant, VariantSchema, VariantMap> {
+  ): ADTValue<Variant, VariantSchema, VariantMap> {
     return {
-      [keys.type]: "value",
-      [keys.id]: enumStatic[keys.id],
-      [keys.variant]: variant,
       values: input,
+      // internal
+      [keys.type]: "value",
+      [keys.id]: adtStatic[keys.id],
+      [keys.variant]: variant,
     };
   }
 
   return Object.assign(
     function parse(
       ...input: StandardSchemaV1.InferInput<VariantSchema>
-    ): EnumValue<Variant, VariantSchema, VariantMap> {
+    ): ADTValue<Variant, VariantSchema, VariantMap> {
       return from(parseSync(schema, input));
     },
     {
       from: (...args: StandardSchemaV1.InferOutput<VariantSchema>) =>
         from(args),
       schema,
-      [keys.id]: enumStatic[keys.id],
+      // internal
+      [keys.id]: adtStatic[keys.id],
       [keys.variant]: variant,
       [keys.type]: "variant" as const,
     },
@@ -53,17 +55,18 @@ function makeEnumVariant<
 
 export function construct<const VariantMap extends UnknownVariantMap>(
   variants: VariantMap,
-): Enum<VariantMap> {
-  const enumStatic: EnumStatic = {
+): ADT<VariantMap> {
+  const adtStatic: ADTStatic = {
+    // internal
     [keys.id]: nanoid(),
-    [keys.type]: "enum",
+    [keys.type]: "ADT",
   };
 
-  const target = enumStatic as Enum<VariantMap>;
+  const target = adtStatic as ADT<VariantMap>;
 
   for (const variant in variants) {
-    target[variant] = makeEnumVariant(
-      enumStatic,
+    target[variant] = makeADTVariant(
+      adtStatic,
       variant,
       variants[variant] as never,
     ) as never;
@@ -77,23 +80,23 @@ export function matches<
   VariantSchema extends UnknownArraySchema,
   VariantMap extends UnknownVariantMap,
 >(
-  variant: EnumVariant<Variant, VariantSchema, VariantMap>,
-  value: UnknownEnumValue,
-): value is EnumValue<Variant, VariantSchema, VariantMap>;
+  variant: ADTVariant<Variant, VariantSchema, VariantMap>,
+  value: UnknownADTValue,
+): value is ADTValue<Variant, VariantSchema, VariantMap>;
 export function matches<VariantMap extends UnknownVariantMap>(
-  en: Enum<VariantMap> | EnumVariant<string, UnknownArraySchema, VariantMap>,
-  value: UnknownEnumValue,
-): value is EnumValueFor<Enum<VariantMap>>;
+  adt: ADT<VariantMap> | ADTVariant<string, UnknownArraySchema, VariantMap>,
+  value: UnknownADTValue,
+): value is ADTValueFor<ADT<VariantMap>>;
 export function matches(
-  enOrVariant:
-    | Enum<UnknownVariantMap>
-    | EnumVariant<string, UnknownArraySchema, UnknownVariantMap>,
-  value: UnknownEnumValue,
+  adtOrVariant:
+    | ADT<UnknownVariantMap>
+    | ADTVariant<string, UnknownArraySchema, UnknownVariantMap>,
+  value: UnknownADTValue,
 ) {
-  const enumMatches = enOrVariant[keys.id] === value[keys.id];
-  return enOrVariant[keys.type] === "variant"
-    ? enumMatches && enOrVariant[keys.variant] === value[keys.variant]
-    : enumMatches;
+  const ADTMatches = adtOrVariant[keys.id] === value[keys.id];
+  return adtOrVariant[keys.type] === "variant"
+    ? ADTMatches && adtOrVariant[keys.variant] === value[keys.variant]
+    : ADTMatches;
 }
 
 export function match<
@@ -101,7 +104,7 @@ export function match<
   Variant extends keyof VariantMap & string,
   MatchResults extends Record<NoInfer<Variant>, unknown>,
 >(
-  value: EnumValue<Variant, VariantMap[Variant], VariantMap>,
+  value: ADTValue<Variant, VariantMap[Variant], VariantMap>,
   cases: {
     [V in Variant]: (
       ...args: StandardSchemaV1.InferOutput<VariantMap[V]>
@@ -109,7 +112,7 @@ export function match<
   },
 ): MatchResults[Variant] {
   const variant = value[keys.variant];
-  assert(variant, "value must be an enum value");
+  assert(variant, "value must be an ADT value");
   const matcher = cases[variant];
   assert(matcher, `missing case for ${variant}`);
   return cases[variant](...value.values);

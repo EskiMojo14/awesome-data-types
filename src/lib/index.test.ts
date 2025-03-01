@@ -7,9 +7,9 @@ import type { StandardSchemaV1Dictionary } from "./standard";
 import { identity, transform } from "./standard";
 import type {
   UnknownVariantMap,
-  Enum,
-  EnumValueFor,
-  EnumVariant,
+  ADT,
+  ADTValueFor,
+  ADTVariant,
   UnknownArraySchema,
 } from "./types";
 import { objectEntries, objectKeys } from "./utils";
@@ -61,12 +61,12 @@ const cases = objectEntries(variantInputs);
 const variants = objectKeys(variantInputs);
 
 // wrapper to avoid typescript complaints
-function makeEnumValue<VariantMap extends UnknownVariantMap>(
-  en: Enum<VariantMap>,
+function makeADTValue<VariantMap extends UnknownVariantMap>(
+  adt: ADT<VariantMap>,
   variant: keyof VariantMap,
   args: StandardSchemaV1.InferInput<VariantMap[keyof VariantMap]>,
-): EnumValueFor<typeof en> {
-  return en[variant](...args) as never;
+): ADTValueFor<typeof adt> {
+  return adt[variant](...args) as never;
 }
 
 describe.each([
@@ -74,16 +74,13 @@ describe.each([
   ["with", colorVariantSchemas],
 ] as const)("construct %s validation", (hasValidation, variantSchemas) => {
   const Color = construct(variantSchemas);
-  it("should create an enum", () => {
+  it("should create an ADT", () => {
     expect(Color[keys.id]).toBeTypeOf("string");
     for (const variant of variants) {
       expect(Color[variant]).toBeTypeOf("function");
       expect(Color[variant]).toEqual(
         expect.objectContaining<
-          Omit<
-            EnumVariant<string, UnknownArraySchema, UnknownVariantMap>,
-            never
-          >
+          Omit<ADTVariant<string, UnknownArraySchema, UnknownVariantMap>, never>
         >({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           from: expect.typeOf("function"),
@@ -97,8 +94,8 @@ describe.each([
     }
   });
   it.each(cases)("should create a value for %s", (variant, args) => {
-    const value = makeEnumValue(Color, variant, args);
-    expect(value).toEqual<EnumValueFor<typeof Color>>({
+    const value = makeADTValue(Color, variant, args);
+    expect(value).toEqual<ADTValueFor<typeof Color>>({
       [keys.id]: Color[keys.id],
       [keys.type]: "value",
       [keys.variant]: variant,
@@ -115,7 +112,7 @@ describe.each([
     "should create a value from %s",
     (variant, args) => {
       const value = Color[variant].from(...(args as unknown as Array<never>));
-      expect(value).toEqual<EnumValueFor<typeof Color>>({
+      expect(value).toEqual<ADTValueFor<typeof Color>>({
         [keys.id]: Color[keys.id],
         [keys.type]: "value",
         [keys.variant]: variant,
@@ -129,7 +126,7 @@ describe("matches", () => {
   const Color = construct(colorVariantSchemas);
   it("should match", () => {
     for (const [variant, args] of cases) {
-      const value = makeEnumValue(Color, variant, args);
+      const value = makeADTValue(Color, variant, args);
       expect(matches(Color, value)).toBe(true);
     }
   });
