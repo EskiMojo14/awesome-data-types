@@ -61,7 +61,7 @@ export interface ADTStatic<
   readonly [keys.name]: Name;
   readonly [keys.type]: "ADT";
   // type-only
-  [keys.types]?: {
+  readonly [keys.types]?: {
     variantMap: VariantMap;
   };
 }
