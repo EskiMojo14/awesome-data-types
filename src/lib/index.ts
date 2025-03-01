@@ -12,7 +12,6 @@ import type {
   UnknownADTValue,
   UnknownVariantMap,
 } from "./types";
-import type { NoInfer } from "./utils";
 import { assert } from "./utils";
 
 function makeADTVariant<
@@ -103,13 +102,15 @@ export function matches(
 export function match<
   VariantMap extends UnknownVariantMap,
   Variant extends keyof VariantMap & string,
-  MatchResults extends Record<NoInfer<Variant>, unknown>,
+  MatchResults extends Record<Variant, unknown>,
 >(
   value: ADTValue<VariantMap, Variant, VariantMap[Variant]>,
   cases: {
-    [V in Variant]: (
-      ...args: StandardSchemaV1.InferOutput<VariantMap[V]>
-    ) => MatchResults[V];
+    [V in keyof MatchResults]: V extends Variant
+      ? (
+          ...args: StandardSchemaV1.InferOutput<VariantMap[V]>
+        ) => MatchResults[V]
+      : never;
   },
 ): MatchResults[Variant] {
   const variant = value[keys.variant];
