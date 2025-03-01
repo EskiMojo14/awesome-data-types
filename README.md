@@ -180,10 +180,10 @@ type Color = ADTValueFor<typeof Color>;
 
 function handleColor(color: Color) {
   match(color, {
-    RgbWithoutLabel(r) {
+    RgbWithoutLabel(r, g, b) {
       // r, g, b are numbers
     },
-    RgbWithLabel(r) {
+    RgbWithLabel(r, g, b) {
       // r, g, b are numbers
     },
   });
