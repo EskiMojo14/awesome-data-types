@@ -41,7 +41,7 @@
   ],
   "scripts": {
     "prepare": "husky",
-    "prebuild": "bun run type",
+    "prebuild": "pnpm run type",
     "build": "tsup",
     "test": "vitest",
     "lint": "eslint",
@@ -50,7 +50,7 @@
     "attw": "attw",
     "publint": "publint",
     "type": "tsc",
-    "prepack": "bun run publint"
+    "prepack": "pnpm run publint"
   },
   "prettier": {},
   "lint-staged": {
