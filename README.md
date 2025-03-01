@@ -10,7 +10,13 @@ ADT values are JSON serializable, as long as the data inside is.
 import * as v from "valibot";
 import { rgbToHex } from "./utils";
 import type { AdtValueFor, UnknownAdtValue } from "awesome-data-types";
-import { construct, matches, identity, transform } from "awesome-data-types";
+import {
+  construct,
+  matches,
+  identity,
+  transform,
+  match,
+} from "awesome-data-types";
 
 // for runtime validation
 const Color = construct("Color", {
@@ -50,11 +56,11 @@ function handleUnknownValue(value: UnknownAdtValue) {
   // type guard
   if (matches(Color, value)) {
     // value is a Color
-    value.values; // [255, 0, 0]
+    value.values; // narrowed to [r: number, g: number, b: number] | [hex: string] | [h: number, s: number, l: number]
   }
   if (matches(Color.Rgb, value)) {
     // color is a Color.Rgb
-    color.values; // [255, 0, 0]
+    value.values; // narrowed to [r: number, g: number, b: number]
   }
 }
 
@@ -62,7 +68,7 @@ function handleColor(color: Color) {
   // can manually narrow
   if (color.variant === "Rgb") {
     // color is a Color.Rgb
-    color.values; // [255, 0, 0]
+    color.values; // narrowed to [r: number, g: number, b: number]
   }
   // pattern matching
   const colorString = match(color, {
