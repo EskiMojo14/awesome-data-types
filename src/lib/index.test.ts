@@ -14,7 +14,7 @@ import type {
   UnknownADTValue,
 } from "./types";
 import { objectEntries, objectKeys } from "./utils";
-import { construct, match, matches } from "./index";
+import { construct, isADTValue, match, matches } from "./index";
 
 function rgbToHex([r, g, b]: [number, number, number]) {
   return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
@@ -121,6 +121,26 @@ describe.each([
       });
     },
   );
+});
+
+describe("isADTValue", () => {
+  const Color = construct(colorVariantSchemas);
+  it("should match", () => {
+    for (const [variant, args] of cases) {
+      const value = makeADTValue(Color, variant, args);
+      expect(isADTValue(value)).toBe(true);
+    }
+  });
+  it("should not match", () => {
+    expect(isADTValue({})).toBe(false);
+    expect(isADTValue(null)).toBe(false);
+  });
+  it("works after serialization", () => {
+    const red = Color.Rgb(255, 0, 0);
+    const stringified = JSON.stringify(red);
+    const parsed: unknown = JSON.parse(stringified);
+    expect(isADTValue(parsed)).toBe(true);
+  });
 });
 
 describe("matches", () => {

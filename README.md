@@ -4,6 +4,8 @@ A library for creating ADT enums in TypeScript, powered by runtime validation.
 
 Supports any [Standard Schema](https://standardschema.dev/) library.
 
+ADT values are JSON serializable, as long as the data inside is.
+
 ```ts
 import * as v from "valibot";
 import { rgbToHex } from "./utils";
@@ -187,6 +189,7 @@ function handleColor(color: Color) {
   });
 }
 ```
+
 ![image](https://github.com/user-attachments/assets/d5e04363-7671-4b90-b9a9-420c20194df2)
 ![image](https://github.com/user-attachments/assets/b6c4b0b2-6572-4c4d-8e09-e6ae5b4af502)
 

@@ -119,3 +119,13 @@ export function match<
   assert(matcher, `missing case for ${variant}`);
   return cases[variant](...value.values);
 }
+
+export function isADTValue(value: unknown): value is UnknownADTValue {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    keys.id in value &&
+    keys.type in value &&
+    value[keys.type] === "value"
+  );
+}
