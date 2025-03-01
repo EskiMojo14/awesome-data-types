@@ -1,0 +1,73 @@
+{
+  "name": "wheenums",
+  "module": "./dist/index.js",
+  "type": "module",
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.17.4",
+    "@eslint/js": "^9.21.0",
+    "@types/bun": "latest",
+    "@typescript-eslint/parser": "^8.25.0",
+    "eslint": "^9.21.0",
+    "eslint-import-resolver-typescript": "^3.8.3",
+    "eslint-plugin-import-x": "^4.6.1",
+    "eslint-plugin-vitest": "^0.5.4",
+    "globals": "^16.0.0",
+    "husky": "^9.1.7",
+    "jiti": "^2.4.2",
+    "lint-staged": "^15.4.3",
+    "prettier": "^3.5.2",
+    "publint": "^0.3.7",
+    "tsup": "^8.4.0",
+    "typescript-eslint": "^8.25.0",
+    "vitest": "^3.0.7"
+  },
+  "peerDependencies": {
+    "typescript": "^5.8.2"
+  },
+  "version": "1.0.0",
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepare": "husky",
+    "prebuild": "bun run type",
+    "build": "tsup",
+    "test": "vitest",
+    "lint": "eslint",
+    "format": "prettier",
+    "pre-commit": "lint-staged",
+    "attw": "attw",
+    "publint": "publint",
+    "type": "tsc",
+    "prepack": "bun run publint"
+  },
+  "prettier": {},
+  "lint-staged": {
+    "*.{ts,md}": "prettier --write"
+  },
+  "tsup": {
+    "entry": [
+      "src/index.ts"
+    ],
+    "sourcemap": true,
+    "format": [
+      "esm",
+      "cjs"
+    ],
+    "dts": true,
+    "minify": true
+  },
+  "packageManager": "pnpm@10.5.2+sha256.79a98daa90248b50815e31460790f118c56fe099113370826caa0153be6daba5",
+  "dependencies": {
+    "nanoid": "^5.1.2"
+  }
+}
