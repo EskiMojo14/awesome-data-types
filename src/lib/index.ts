@@ -2,29 +2,29 @@ import type { StandardSchemaV1 } from "@standard-schema/spec";
 import * as keys from "./keys";
 import { parseSync } from "./standard";
 import type {
-  ADT,
-  ADTStatic,
-  ADTValue,
-  ADTValueFor,
-  ADTVariant,
+  Adt,
+  AdtStatic,
+  AdtValue,
+  AdtValueFor,
+  AdtVariant,
   UnknownArraySchema,
-  UnknownADTValue,
+  UnknownAdtValue,
   UnknownVariantMap,
 } from "./types";
 import { assert } from "./utils";
 
-function makeADTVariant<
+function makeAdtVariant<
   Name extends string,
   Variant extends string,
   VariantSchema extends UnknownArraySchema,
 >(
-  adtStatic: ADTStatic<Name, UnknownVariantMap>,
+  adtStatic: AdtStatic<Name, UnknownVariantMap>,
   variant: Variant,
   schema: VariantSchema,
-): ADTVariant<Name, Variant, VariantSchema> {
+): AdtVariant<Name, Variant, VariantSchema> {
   function from(
     input: StandardSchemaV1.InferOutput<VariantSchema>,
-  ): ADTValue<Name, Variant, VariantSchema> {
+  ): AdtValue<Name, Variant, VariantSchema> {
     return {
       values: input,
       variant,
@@ -37,7 +37,7 @@ function makeADTVariant<
   return Object.assign(
     function parse(
       ...input: StandardSchemaV1.InferInput<VariantSchema>
-    ): ADTValue<Name, Variant, VariantSchema> {
+    ): AdtValue<Name, Variant, VariantSchema> {
       return from(parseSync(schema, input));
     },
     {
@@ -55,16 +55,16 @@ function makeADTVariant<
 export function construct<
   const Name extends string,
   const VariantMap extends UnknownVariantMap,
->(name: Name, variants: VariantMap): ADT<Name, VariantMap> {
-  const adtStatic: ADTStatic<Name, VariantMap> = {
+>(name: Name, variants: VariantMap): Adt<Name, VariantMap> {
+  const adtStatic: AdtStatic<Name, VariantMap> = {
     [keys.name]: name,
     [keys.type]: "ADT",
   };
 
-  const target = adtStatic as ADT<Name, VariantMap>;
+  const target = adtStatic as Adt<Name, VariantMap>;
 
   for (const variant in variants) {
-    target[variant] = makeADTVariant(
+    target[variant] = makeAdtVariant(
       adtStatic,
       variant,
       variants[variant] as never,
@@ -79,21 +79,21 @@ export function matches<
   Variant extends string,
   VariantSchema extends UnknownArraySchema,
 >(
-  variant: ADTVariant<Name, Variant, VariantSchema>,
-  value: UnknownADTValue,
-): value is ADTValue<Name, Variant, VariantSchema>;
+  variant: AdtVariant<Name, Variant, VariantSchema>,
+  value: UnknownAdtValue,
+): value is AdtValue<Name, Variant, VariantSchema>;
 export function matches<
   Name extends string,
   VariantMap extends UnknownVariantMap,
 >(
-  adt: ADT<Name, VariantMap>,
-  value: UnknownADTValue,
-): value is ADTValueFor<ADT<Name, VariantMap>>;
+  adt: Adt<Name, VariantMap>,
+  value: UnknownAdtValue,
+): value is AdtValueFor<Adt<Name, VariantMap>>;
 export function matches(
   adtOrVariant:
-    | ADT<string, UnknownVariantMap>
-    | ADTVariant<string, string, UnknownArraySchema>,
-  value: UnknownADTValue,
+    | Adt<string, UnknownVariantMap>
+    | AdtVariant<string, string, UnknownArraySchema>,
+  value: UnknownAdtValue,
 ) {
   const nameMatches = adtOrVariant[keys.name] === value[keys.name];
   return adtOrVariant[keys.type] === "variant"
@@ -102,7 +102,7 @@ export function matches(
 }
 
 export function match<
-  Value extends UnknownADTValue,
+  Value extends UnknownAdtValue,
   MatcherResults extends Record<Value["variant"], unknown>,
 >(
   value: Value,
@@ -121,7 +121,7 @@ export function match<
   return matcher(...value.values);
 }
 
-export function isADTValue(value: unknown): value is UnknownADTValue {
+export function isAdtValue(value: unknown): value is UnknownAdtValue {
   return (
     typeof value === "object" &&
     value !== null &&

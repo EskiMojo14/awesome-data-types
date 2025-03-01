@@ -1,13 +1,13 @@
 export type {
-  ADT,
-  ADTValue,
-  ADTVariant,
+  Adt,
+  AdtValue,
+  AdtVariant,
   UnknownVariantMap,
-  UnknownADTValue,
-  ADTVariantMap,
-  ADTValueFor,
+  UnknownAdtValue,
+  AdtVariantMap,
+  AdtValueFor,
   ValueOf,
   InputFor,
 } from "./lib/types";
-export { construct, match } from "./lib";
+export { construct, match, isAdtValue, matches } from "./lib";
 export { transform, identity, labelArgs } from "./lib/standard";

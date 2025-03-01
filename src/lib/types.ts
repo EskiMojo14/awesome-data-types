@@ -1,7 +1,7 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type * as keys from "./keys";
 
-export interface ADTValue<
+export interface AdtValue<
   Name extends string,
   Variant extends string,
   VariantSchema extends UnknownArraySchema,
@@ -16,11 +16,11 @@ export interface ADTValue<
 export type UnknownArraySchema = StandardSchemaV1<ReadonlyArray<unknown>>;
 
 export type UnknownVariantMap = Record<string, UnknownArraySchema> &
-  Partial<Record<keyof ADTStatic<any, any>, never>>;
+  Partial<Record<keyof AdtStatic<any, any>, never>>;
 
-export type UnknownADTValue = ADTValue<string, string, UnknownArraySchema>;
+export type UnknownAdtValue = AdtValue<string, string, UnknownArraySchema>;
 
-export interface ADTVariant<
+export interface AdtVariant<
   Name extends string,
   Variant extends string,
   VariantSchema extends UnknownArraySchema,
@@ -28,11 +28,11 @@ export interface ADTVariant<
   /** parse and validate */
   (
     ...values: StandardSchemaV1.InferInput<VariantSchema>
-  ): ADTValue<Name, Variant, VariantSchema>;
+  ): AdtValue<Name, Variant, VariantSchema>;
   /** skip parsing */
   from(
     ...values: StandardSchemaV1.InferOutput<VariantSchema>
-  ): ADTValue<Name, Variant, VariantSchema>;
+  ): AdtValue<Name, Variant, VariantSchema>;
 
   readonly schema: VariantSchema;
 
@@ -42,18 +42,18 @@ export interface ADTVariant<
   readonly [keys.type]: "variant";
 }
 
-export type ADTVariants<
+export type AdtVariants<
   Name extends string,
   VariantMap extends UnknownVariantMap,
 > = {
-  [Variant in keyof VariantMap & string]: ADTVariant<
+  [Variant in keyof VariantMap & string]: AdtVariant<
     Name,
     Variant,
     VariantMap[Variant]
   >;
 };
 
-export interface ADTStatic<
+export interface AdtStatic<
   Name extends string,
   VariantMap extends UnknownVariantMap,
 > {
@@ -66,22 +66,22 @@ export interface ADTStatic<
   };
 }
 
-export type ADT<
+export type Adt<
   Name extends string,
   VariantMap extends UnknownVariantMap,
-> = ADTVariants<Name, VariantMap> & ADTStatic<Name, VariantMap>;
+> = AdtVariants<Name, VariantMap> & AdtStatic<Name, VariantMap>;
 
-export type ADTVariantMap<E extends ADT<any, any>> = NonNullable<
+export type AdtVariantMap<E extends Adt<any, any>> = NonNullable<
   E[typeof keys.types]
 >["variantMap"];
 
-export type ADTValueFor<E extends ADT<any, any>> = {
-  [Variant in keyof ADTVariantMap<E> & string]: ADTValue<
+export type AdtValueFor<E extends Adt<any, any>> = {
+  [Variant in keyof AdtVariantMap<E> & string]: AdtValue<
     E[typeof keys.name],
     Variant,
-    ADTVariantMap<E>[Variant]
+    AdtVariantMap<E>[Variant]
   >;
-}[keyof ADTVariantMap<E> & string];
+}[keyof AdtVariantMap<E> & string];
 
 export type ValueOf<T extends { schema: UnknownArraySchema }> =
   StandardSchemaV1.InferOutput<T["schema"]>;

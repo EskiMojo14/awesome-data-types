@@ -7,14 +7,14 @@ import type { StandardSchemaV1Dictionary } from "./standard";
 import { identity, transform } from "./standard";
 import type {
   UnknownVariantMap,
-  ADT,
-  ADTValueFor,
-  ADTVariant,
+  Adt,
+  AdtValueFor,
+  AdtVariant,
   UnknownArraySchema,
-  UnknownADTValue,
+  UnknownAdtValue,
 } from "./types";
 import { objectEntries, objectKeys } from "./utils";
-import { construct, isADTValue, match, matches } from "./index";
+import { construct, isAdtValue, match, matches } from "./index";
 
 function rgbToHex([r, g, b]: [number, number, number]) {
   return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
@@ -62,11 +62,11 @@ const cases = objectEntries(variantInputs);
 const variants = objectKeys(variantInputs);
 
 // wrapper to avoid typescript complaints
-function makeADTValue<VariantMap extends UnknownVariantMap>(
-  adt: ADT<string, VariantMap>,
+function makeAdtValue<VariantMap extends UnknownVariantMap>(
+  adt: Adt<string, VariantMap>,
   variant: keyof VariantMap,
   args: StandardSchemaV1.InferInput<VariantMap[keyof VariantMap]>,
-): ADTValueFor<typeof adt> {
+): AdtValueFor<typeof adt> {
   return adt[variant](...args) as never;
 }
 
@@ -75,13 +75,13 @@ describe.each([
   ["with", colorVariantSchemas],
 ] as const)("construct %s validation", (hasValidation, variantSchemas) => {
   const Color = construct("Color", variantSchemas);
-  it("should create an ADT", () => {
+  it("should create an Adt", () => {
     expect(Color[keys.name]).toBe("Color");
     for (const variant of variants) {
       expect(Color[variant]).toBeTypeOf("function");
       expect(Color[variant]).toEqual(
         expect.objectContaining<
-          Omit<ADTVariant<string, string, UnknownArraySchema>, never>
+          Omit<AdtVariant<string, string, UnknownArraySchema>, never>
         >({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           from: expect.typeOf("function"),
@@ -96,8 +96,8 @@ describe.each([
     }
   });
   it.each(cases)("should create a value for %s", (variant, args) => {
-    const value = makeADTValue(Color, variant, args);
-    expect(value).toEqual<UnknownADTValue>({
+    const value = makeAdtValue(Color, variant, args);
+    expect(value).toEqual<UnknownAdtValue>({
       variant,
       values: variantOutputs[variant],
       [keys.name]: Color[keys.name],
@@ -114,7 +114,7 @@ describe.each([
     "should create a value from %s",
     (variant, args) => {
       const value = Color[variant].from(...(args as unknown as Array<never>));
-      expect(value).toEqual<UnknownADTValue>({
+      expect(value).toEqual<UnknownAdtValue>({
         variant,
         values: args,
         [keys.name]: Color[keys.name],
@@ -124,23 +124,23 @@ describe.each([
   );
 });
 
-describe("isADTValue", () => {
+describe("isAdtValue", () => {
   const Color = construct("Color", colorVariantSchemas);
   it("should match", () => {
     for (const [variant, args] of cases) {
-      const value = makeADTValue(Color, variant, args);
-      expect(isADTValue(value)).toBe(true);
+      const value = makeAdtValue(Color, variant, args);
+      expect(isAdtValue(value)).toBe(true);
     }
   });
   it("should not match", () => {
-    expect(isADTValue({})).toBe(false);
-    expect(isADTValue(null)).toBe(false);
+    expect(isAdtValue({})).toBe(false);
+    expect(isAdtValue(null)).toBe(false);
   });
   it("works after serialization", () => {
     const red = Color.Rgb(255, 0, 0);
     const stringified = JSON.stringify(red);
     const parsed: unknown = JSON.parse(stringified);
-    expect(isADTValue(parsed)).toBe(true);
+    expect(isAdtValue(parsed)).toBe(true);
   });
 });
 
@@ -148,7 +148,7 @@ describe("matches", () => {
   const Color = construct("Color", colorVariantSchemas);
   it("should match", () => {
     for (const [variant, args] of cases) {
-      const value = makeADTValue(Color, variant, args);
+      const value = makeAdtValue(Color, variant, args);
       expect(matches(Color, value)).toBe(true);
     }
   });

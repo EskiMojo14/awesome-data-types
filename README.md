@@ -9,7 +9,7 @@ ADT values are JSON serializable, as long as the data inside is.
 ```ts
 import * as v from "valibot";
 import { rgbToHex } from "./utils";
-import type { ADTValueFor, UnknownADTValue } from "awesome-data-types";
+import type { AdtValueFor, UnknownAdtValue } from "awesome-data-types";
 import { construct, matches, identity, transform } from "awesome-data-types";
 
 // for runtime validation
@@ -36,7 +36,7 @@ const Color = construct("Color", {
   ),
 });
 
-type Color = ADTValueFor<typeof Color>;
+type Color = AdtValueFor<typeof Color>;
 
 const red = Color.Rgb(255, 0, 0);
 const green = Color.Hex("#00ff00");
@@ -46,7 +46,7 @@ const purple = Color.HexFromRgb(128, 0, 128);
 // construct without validation or transformation
 const purple2 = Color.HexFromRgb.from("#800080");
 
-function handleUnknownValue(value: UnknownADTValue) {
+function handleUnknownValue(value: UnknownAdtValue) {
   // type guard
   if (matches(Color, value)) {
     // value is a Color
@@ -87,7 +87,7 @@ const Color = construct("Color", {
   Hsl: identity<[h: number, s: number, l: number]>(),
 });
 // construct a discriminated union of values
-type Color = ADTValueFor<typeof Color>;
+type Color = AdtValueFor<typeof Color>;
 ```
 
 Each variant is a function that takes the variant's arguments and returns an ADT value, storing the parsed arguments.
@@ -176,7 +176,7 @@ const Color = construct("Color", {
   RgbWithoutLabel: rgbSchema,
   RgbWithLabel: labelArgs<[r: number, g: number, b: number]>()(rgbSchema),
 });
-type Color = ADTValueFor<typeof Color>;
+type Color = AdtValueFor<typeof Color>;
 
 function handleColor(color: Color) {
   match(color, {

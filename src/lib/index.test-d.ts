@@ -1,7 +1,7 @@
 import * as v from "valibot";
 import { describe, expectTypeOf, it } from "vitest";
 import { identity, transform } from "./standard";
-import type { ADTValueFor, UnknownADTValue, ValueOf, InputFor } from "./types";
+import type { AdtValueFor, UnknownAdtValue, ValueOf, InputFor } from "./types";
 import { construct, matches, match } from "./index";
 
 declare function rgbToHex(rgb: [number, number, number]): string;
@@ -14,7 +14,7 @@ const Color = construct("Color", {
     (rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)],
   ),
 });
-type Color = ADTValueFor<typeof Color>;
+type Color = AdtValueFor<typeof Color>;
 
 it("provides utils", () => {
   expectTypeOf<ValueOf<typeof Color.HexFromRgb>>().toEqualTypeOf<
@@ -25,7 +25,7 @@ it("provides utils", () => {
   >();
 });
 
-declare const unknownValue: UnknownADTValue;
+declare const unknownValue: UnknownAdtValue;
 declare const colorValue: Color;
 
 describe("construct", () => {
