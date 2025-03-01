@@ -8,8 +8,8 @@ export interface ADTValue<
 > {
   values: StandardSchemaV1.InferOutput<VariantSchema>;
   // internal
-  [keys.type]: "value";
   [keys.id]: string;
+  [keys.type]: "value";
   [keys.variant]: Variant;
   // type-only
   [keys.variantMap]?: VariantMap;
@@ -43,8 +43,8 @@ export interface ADTVariant<
   readonly schema: VariantSchema;
 
   // internal
-  [keys.type]: "variant";
   [keys.id]: string;
+  [keys.type]: "variant";
   [keys.variant]: Variant;
   // type-only
   [keys.variantMap]?: VariantMap;
@@ -60,8 +60,8 @@ export type ADTVariants<VariantMap extends UnknownVariantMap> = {
 
 export interface ADTStatic {
   // internal
-  [keys.type]: "ADT";
   [keys.id]: string;
+  [keys.type]: "ADT";
 }
 
 export type ADT<VariantMap extends UnknownVariantMap> =

@@ -29,8 +29,8 @@ function makeADTVariant<
     return {
       values: input,
       // internal
-      [keys.type]: "value",
       [keys.id]: adtStatic[keys.id],
+      [keys.type]: "value",
       [keys.variant]: variant,
     };
   }
@@ -47,8 +47,8 @@ function makeADTVariant<
       schema,
       // internal
       [keys.id]: adtStatic[keys.id],
-      [keys.variant]: variant,
       [keys.type]: "variant" as const,
+      [keys.variant]: variant,
     },
   );
 }
