@@ -170,27 +170,27 @@ schema["~standard"].validate(1); // { value: 2 }
 Take a tuple schema and add labels to the items. Useful when using a schema library, since by default tuple items will just be labeled `arg_n`.
 
 ```ts
-import * as v from "valibot";
-import { rgbToHex } from "./utils";
-import { labelArgs, construct } from "awesome-data-types";
-
-const baseSchema = v.tuple([v.number(), v.number(), v.number()]);
-const schema = labelArgs<[r: number, g: number, b: number]>(baseSchema);
-
-const transformingSchema<[r: number, g: number, b: number], [hex: string]>(v.pipe(
-  baseSchema,
-  v.transform((rgb) => rgbToHex(rgb)),
-  v.tuple([v.string()]),
-));
-
 const Color = construct({
-  Rgb: schema,
+  RgbWithoutLabel: rgbSchema,
+  RgbWithLabel: labelArgs<[r: number, g: number, b: number]>()(rgbSchema),
 });
+type Color = ADTValueFor<typeof Color>;
 
-Color.Rgb(1, 2, 3); // args are correctly labeled Rgb(r, g, b)
+function handleColor(color: Color) {
+  match(color, {
+    RgbWithoutLabel(r) {
+      // r, g, b are numbers
+    },
+    RgbWithLabel(r) {
+      // r, g, b are numbers
+    },
+  });
+}
 ```
+![image](https://github.com/user-attachments/assets/d5e04363-7671-4b90-b9a9-420c20194df2)
+![image](https://github.com/user-attachments/assets/b6c4b0b2-6572-4c4d-8e09-e6ae5b4af502)
 
-Note that the type will be widened to a standard schema - if you want to preserve the base schema type, you can use the curried form.
+Note that the type will be widened to a standard schema with a single call - if you want to preserve the base schema type, you can use the curried form.
 
 ```ts
 const baseSchema = v.tuple([v.number(), v.number(), v.number()]);
