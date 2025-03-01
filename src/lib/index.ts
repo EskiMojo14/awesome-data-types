@@ -17,7 +17,7 @@ import { assert } from "./utils";
 function makeADTVariant<
   VariantMap extends UnknownVariantMap,
   Variant extends keyof VariantMap & string,
-  VariantSchema extends UnknownArraySchema,
+  VariantSchema extends VariantMap[Variant],
 >(
   adtStatic: ADTStatic,
   variant: Variant,
@@ -78,13 +78,13 @@ export function construct<const VariantMap extends UnknownVariantMap>(
 export function matches<
   VariantMap extends UnknownVariantMap,
   Variant extends keyof VariantMap & string,
-  VariantSchema extends UnknownArraySchema,
+  VariantSchema extends VariantMap[Variant],
 >(
   variant: ADTVariant<VariantMap, Variant, VariantSchema>,
   value: UnknownADTValue,
 ): value is ADTValue<VariantMap, Variant, VariantSchema>;
 export function matches<VariantMap extends UnknownVariantMap>(
-  adt: ADT<VariantMap> | ADTVariant<VariantMap, string, UnknownArraySchema>,
+  adt: ADT<VariantMap>,
   value: UnknownADTValue,
 ): value is ADTValueFor<ADT<VariantMap>>;
 export function matches(

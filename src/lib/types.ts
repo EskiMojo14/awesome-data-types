@@ -4,7 +4,7 @@ import type * as keys from "./keys";
 export interface ADTValue<
   VariantMap extends UnknownVariantMap,
   Variant extends keyof VariantMap & string,
-  VariantSchema extends StandardSchemaV1,
+  VariantSchema extends VariantMap[Variant],
 > {
   values: StandardSchemaV1.InferOutput<VariantSchema>;
   // internal
@@ -23,13 +23,13 @@ export type UnknownVariantMap = Record<string, UnknownArraySchema> &
 export type UnknownADTValue = ADTValue<
   UnknownVariantMap,
   string,
-  StandardSchemaV1
+  UnknownArraySchema
 >;
 
 export interface ADTVariant<
   VariantMap extends UnknownVariantMap,
   Variant extends keyof VariantMap & string,
-  VariantSchema extends UnknownArraySchema,
+  VariantSchema extends VariantMap[Variant],
 > {
   /** parse and validate */
   (
