@@ -5,7 +5,7 @@ A library for creating ADT enums in TypeScript. Uses Standard Schemas for runtim
 ```ts
 import * as v from "valibot";
 import { rgbToHex } from "./utils";
-import { construct, match, identity, transform } from "awesome-data-types";
+import { construct, matches, identity, transform } from "awesome-data-types";
 
 // for compile time only validation
 const Color = construct({
@@ -40,21 +40,12 @@ const purple = Color.HexFromRgb(128, 0, 128);
 const purple2 = Color.HexFromRgb.from("#800080");
 
 // basic matching
-if (Color.matches(red)) {
+if (matches(Color, red)) {
   // red is a Color
   color.values; // [255, 0, 0]
 }
-if (Color.Rgb.matches(red)) {
+if (matches(Color.Rgb, red)) {
   // red is a Color.Rgb
   color.values; // [255, 0, 0]
 }
-
-// matching
-// throws if no match
-const asString = match(Color, red, {
-  Rgb: (r, g, b) => `rgb(${r}, ${g}, ${b})`,
-  Hex: (hex) => hex,
-  HexFromRgb: (hex) => hex,
-  Hsl: (h, s, l) => `hsl(${h}, ${s}%, ${l}%)`,
-});
 ```

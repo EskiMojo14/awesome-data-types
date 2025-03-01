@@ -6,6 +6,7 @@ export interface EnumValue<
   Variant extends string,
   VariantSchema extends StandardSchemaV1,
 > {
+  [keys.type]: "value";
   [keys.id]: string;
   [keys.variant]: Variant;
   values: StandardSchemaV1.InferOutput<VariantSchema>;
@@ -14,7 +15,7 @@ export interface EnumValue<
 export type UnknownVariantMap = StandardSchemaV1Dictionary<
   Record<string, ReadonlyArray<unknown>>
 > &
-  Partial<Record<keyof EnumStatic<any>, never>>;
+  Partial<Record<keyof EnumStatic, never>>;
 
 export type UnknownEnumValue = EnumValue<string, StandardSchemaV1>;
 
@@ -26,12 +27,16 @@ export interface EnumVariant<
   (
     ...values: StandardSchemaV1.InferInput<VariantSchema>
   ): EnumValue<Variant, VariantSchema>;
-  /** check if value is of this variant */
-  matches(value: UnknownEnumValue): value is EnumValue<Variant, VariantSchema>;
   /** skip parsing */
   from(
     ...values: StandardSchemaV1.InferOutput<VariantSchema>
   ): EnumValue<Variant, VariantSchema>;
+
+  readonly schema: VariantSchema;
+
+  [keys.type]: "variant";
+  [keys.id]: string;
+  [keys.variant]: Variant;
 }
 
 export type EnumVariants<VariantMap extends UnknownVariantMap> = {
@@ -41,13 +46,13 @@ export type EnumVariants<VariantMap extends UnknownVariantMap> = {
   >;
 };
 
-export interface EnumStatic<VariantMap extends UnknownVariantMap> {
+export interface EnumStatic {
+  [keys.type]: "enum";
   [keys.id]: string;
-  matches(value: UnknownEnumValue): value is EnumValueFor<Enum<VariantMap>>;
 }
 
 export type Enum<VariantMap extends UnknownVariantMap> =
-  EnumVariants<VariantMap> & EnumStatic<VariantMap>;
+  EnumVariants<VariantMap> & EnumStatic;
 
 export type EnumVariantMap<E extends Enum<UnknownVariantMap>> =
   E extends Enum<infer VariantMap> ? VariantMap : never;
