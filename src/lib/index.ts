@@ -10,13 +10,14 @@ import type {
   Enum,
   EnumStatic,
   VariantMatchers,
+  EnumValueFor,
 } from "./types";
 import { assert } from "./utils";
 
 function matchesEnum<VariantMap extends UnknownVariantMap>(
   en: EnumStatic<VariantMap>,
   value: UnknownEnumValue,
-): value is EnumValue<VariantMap, keyof VariantMap & string> {
+): value is EnumValueFor<Enum<VariantMap>> {
   return value[keys.id] === en[keys.id];
 }
 
@@ -27,7 +28,7 @@ function matchesVariant<
   en: EnumStatic<VariantMap>,
   variant: Variant,
   value: UnknownEnumValue,
-): value is EnumValue<VariantMap, Variant> {
+): value is EnumValue<Variant, VariantMap[Variant]> {
   return value[keys.id] === en[keys.id] && value[keys.variant] === variant;
 }
 
@@ -38,10 +39,10 @@ function makeEnumVariant<
   enumStatic: EnumStatic<VariantMap>,
   variant: Variant,
   schema: VariantMap[Variant],
-): EnumVariant<VariantMap, Variant> {
+): EnumVariant<Variant, VariantMap[Variant]> {
   function construct(
     ...input: StandardSchemaV1.InferInput<VariantMap[Variant]>
-  ): EnumValue<VariantMap, Variant> {
+  ): EnumValue<Variant, VariantMap[Variant]> {
     const result = parseSync(schema, input);
     return {
       [keys.id]: enumStatic[keys.id],
@@ -83,7 +84,7 @@ export function match<
   MatcherValues extends Record<Variant, unknown>,
 >(
   en: Enum<VariantMap>,
-  value: EnumValue<NoInfer<VariantMap>, Variant>,
+  value: EnumValue<Variant, VariantMap[Variant]>,
   matchers: VariantMatchers<VariantMap, Variant, MatcherValues>,
 ): MatcherValues[Variant] {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition

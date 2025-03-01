@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import * as keys from "./keys";
 import type { StandardSchemaV1Dictionary } from "./standard";
 import { identity, transform } from "./standard";
-import type { UnknownVariantMap, Enum, EnumValue } from "./types";
+import type { UnknownVariantMap, Enum, EnumValueFor } from "./types";
 import { objectEntries, objectKeys } from "./utils";
 import { construct, match } from "./index";
 
@@ -59,7 +59,7 @@ function makeEnumValue<VariantMap extends UnknownVariantMap>(
   en: Enum<VariantMap>,
   variant: keyof VariantMap,
   args: StandardSchemaV1.InferInput<VariantMap[keyof VariantMap]>,
-): EnumValue<VariantMap, keyof VariantMap> {
+): EnumValueFor<typeof en> {
   return en[variant](...args) as never;
 }
 
