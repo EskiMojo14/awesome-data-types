@@ -75,3 +75,8 @@ export type ADTValueFor<E extends ADT<any>> = ADTValue<
   keyof ADTVariantMap<E> & string,
   ADTVariantMap<E>[keyof ADTVariantMap<E>]
 >;
+
+export type ValueOf<T extends { schema: UnknownArraySchema }> =
+  StandardSchemaV1.InferOutput<T["schema"]>;
+export type InputFor<T extends { schema: UnknownArraySchema }> =
+  StandardSchemaV1.InferInput<T["schema"]>;
