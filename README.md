@@ -172,3 +172,15 @@ const Color = construct({
 
 Color.Rgb(1, 2, 3); // args are correctly labeled Rgb(r, g, b)
 ```
+
+Note that the type will be widened to a standard schema - if you want to preserve the base schema type, you can use the curried form.
+
+```ts
+const baseSchema = v.tuple([v.number(), v.number(), v.number()]);
+
+const schema = labelArgs<[r: number, g: number, b: number]>(baseSchema);
+schema.items; // error - we've lost the base schema type
+
+const schema2 = labelArgs<[r: number, g: number, b: number]>()(baseSchema);
+schema2.items; // ok - we've preserved the base schema type
+```
