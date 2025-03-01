@@ -80,7 +80,7 @@ describe.each([
       expect(Color[variant]).toBeTypeOf("function");
       expect(Color[variant]).toEqual(
         expect.objectContaining<
-          Omit<ADTVariant<string, UnknownArraySchema, UnknownVariantMap>, never>
+          Omit<ADTVariant<UnknownVariantMap, string, UnknownArraySchema>, never>
         >({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           from: expect.typeOf("function"),
