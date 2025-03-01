@@ -3,5 +3,6 @@ export type {
   EnumValue,
   EnumVariant,
   UnknownVariantMap,
+  UnknownEnumValue,
 } from "./lib/types";
 export { construct, match } from "./lib";

@@ -11,21 +11,16 @@ export interface EnumValue<
 
 export type UnknownVariantMap = Record<string, ReadonlyArray<unknown>>;
 
-export type AnyEnumValue<VariantMap extends UnknownVariantMap> = EnumValue<
-  VariantMap,
-  keyof VariantMap & string
->;
+export type UnknownEnumValue = EnumValue<UnknownVariantMap, string>;
 
 export interface EnumVariant<
   VariantMap extends UnknownVariantMap,
   Variant extends keyof VariantMap & string,
 > {
   (...values: VariantMap[Variant]): EnumValue<VariantMap, Variant>;
-  matches(
-    value: AnyEnumValue<VariantMap>,
-  ): value is EnumValue<VariantMap, Variant>;
+  matches(value: UnknownEnumValue): value is EnumValue<VariantMap, Variant>;
   derive<Derived>(
-    value: AnyEnumValue<VariantMap>,
+    value: UnknownEnumValue,
     derive: (...values: VariantMap[Variant]) => Derived,
   ): Derived | undefined;
 }

@@ -3,7 +3,7 @@ import * as keys from "./keys";
 import type {
   UnknownVariantMap,
   EnumValue,
-  AnyEnumValue,
+  UnknownEnumValue,
   EnumVariant,
   Enum,
 } from "./types";
@@ -22,13 +22,13 @@ function makeEnumVariant<
   }
 
   function matches(
-    value: AnyEnumValue<VariantMap>,
+    value: UnknownEnumValue,
   ): value is EnumValue<VariantMap, Variant> {
     return value[keys.id] === enumId && value[keys.variant] === variant;
   }
 
   function derive<Derived>(
-    value: AnyEnumValue<VariantMap>,
+    value: UnknownEnumValue,
     derive: (...values: VariantMap[Variant]) => Derived,
   ) {
     if (matches(value)) {
