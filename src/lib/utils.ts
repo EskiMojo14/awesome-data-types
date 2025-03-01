@@ -1,6 +1,7 @@
 export type NotNullish = NonNullable<unknown>;
 export type NonReducibleUnknown = NotNullish | null | undefined;
 export type LooseAutocomplete<T> = T | NonReducibleUnknown;
+export type NoInfer<T> = [T][T extends any ? 0 : never];
 
 export function assert(
   condition: unknown,

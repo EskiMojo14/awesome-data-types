@@ -12,6 +12,7 @@ import type {
   UnknownADTValue,
   UnknownVariantMap,
 } from "./types";
+import type { NoInfer } from "./utils";
 import { assert } from "./utils";
 
 function makeADTVariant<
