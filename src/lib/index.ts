@@ -3,18 +3,19 @@ import { nanoid } from "nanoid/non-secure";
 import * as keys from "./keys";
 import { parseSync } from "./standard";
 import type {
-  UnknownVariantMap,
-  EnumValue,
-  UnknownEnumValue,
-  EnumVariant,
   Enum,
   EnumStatic,
+  EnumValue,
   EnumValueFor,
+  EnumVariant,
+  UnknownArraySchema,
+  UnknownEnumValue,
+  UnknownVariantMap,
 } from "./types";
 
 function makeEnumVariant<
   Variant extends string,
-  VariantSchema extends StandardSchemaV1<ReadonlyArray<unknown>>,
+  VariantSchema extends UnknownArraySchema,
 >(
   enumStatic: EnumStatic,
   variant: Variant,
@@ -71,21 +72,23 @@ export function construct<const VariantMap extends UnknownVariantMap>(
 
 export function matches<
   Variant extends string,
-  VariantSchema extends StandardSchemaV1<ReadonlyArray<unknown>>,
+  VariantSchema extends UnknownArraySchema,
 >(
-  en: EnumVariant<Variant, VariantSchema>,
+  variant: EnumVariant<Variant, VariantSchema>,
   value: UnknownEnumValue,
 ): value is EnumValue<Variant, VariantSchema>;
 export function matches<VariantMap extends UnknownVariantMap>(
   en: Enum<VariantMap>,
   value: UnknownEnumValue,
 ): value is EnumValueFor<Enum<VariantMap>>;
-export function matches<VariantMap extends UnknownVariantMap>(
-  en: Enum<VariantMap> | EnumVariant<keyof VariantMap & string, any>,
+export function matches(
+  enOrVariant:
+    | Enum<UnknownVariantMap>
+    | EnumVariant<string, UnknownArraySchema>,
   value: UnknownEnumValue,
 ) {
-  const enumMatches = en[keys.id] === value[keys.id];
-  return keys.variant in en
-    ? enumMatches && en[keys.variant] === value[keys.variant]
+  const enumMatches = enOrVariant[keys.id] === value[keys.id];
+  return keys.variant in enOrVariant
+    ? enumMatches && enOrVariant[keys.variant] === value[keys.variant]
     : enumMatches;
 }

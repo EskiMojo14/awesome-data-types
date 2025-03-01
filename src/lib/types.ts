@@ -1,7 +1,5 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type * as keys from "./keys";
-import type { StandardSchemaV1Dictionary } from "./standard";
-
 export interface EnumValue<
   Variant extends string,
   VariantSchema extends StandardSchemaV1,
@@ -12,16 +10,16 @@ export interface EnumValue<
   values: StandardSchemaV1.InferOutput<VariantSchema>;
 }
 
-export type UnknownVariantMap = StandardSchemaV1Dictionary<
-  Record<string, ReadonlyArray<unknown>>
-> &
+export type UnknownArraySchema = StandardSchemaV1<ReadonlyArray<unknown>>;
+
+export type UnknownVariantMap = Record<string, UnknownArraySchema> &
   Partial<Record<keyof EnumStatic, never>>;
 
 export type UnknownEnumValue = EnumValue<string, StandardSchemaV1>;
 
 export interface EnumVariant<
   Variant extends string,
-  VariantSchema extends StandardSchemaV1<ReadonlyArray<unknown>>,
+  VariantSchema extends UnknownArraySchema,
 > {
   /** parse and validate */
   (
