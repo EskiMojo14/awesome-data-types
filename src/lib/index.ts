@@ -15,17 +15,17 @@ import type {
 import { assert } from "./utils";
 
 function makeADTVariant<
-  Variant extends string,
-  VariantSchema extends UnknownArraySchema,
   VariantMap extends UnknownVariantMap,
+  Variant extends keyof VariantMap & string,
+  VariantSchema extends UnknownArraySchema,
 >(
   adtStatic: ADTStatic,
   variant: Variant,
   schema: VariantSchema,
-): ADTVariant<Variant, VariantSchema, VariantMap> {
+): ADTVariant<VariantMap, Variant, VariantSchema> {
   function from(
     input: StandardSchemaV1.InferOutput<VariantSchema>,
-  ): ADTValue<Variant, VariantSchema, VariantMap> {
+  ): ADTValue<VariantMap, Variant, VariantSchema> {
     return {
       values: input,
       // internal
@@ -38,7 +38,7 @@ function makeADTVariant<
   return Object.assign(
     function parse(
       ...input: StandardSchemaV1.InferInput<VariantSchema>
-    ): ADTValue<Variant, VariantSchema, VariantMap> {
+    ): ADTValue<VariantMap, Variant, VariantSchema> {
       return from(parseSync(schema, input));
     },
     {
@@ -76,21 +76,21 @@ export function construct<const VariantMap extends UnknownVariantMap>(
 }
 
 export function matches<
-  Variant extends string,
-  VariantSchema extends UnknownArraySchema,
   VariantMap extends UnknownVariantMap,
+  Variant extends keyof VariantMap & string,
+  VariantSchema extends UnknownArraySchema,
 >(
-  variant: ADTVariant<Variant, VariantSchema, VariantMap>,
+  variant: ADTVariant<VariantMap, Variant, VariantSchema>,
   value: UnknownADTValue,
-): value is ADTValue<Variant, VariantSchema, VariantMap>;
+): value is ADTValue<VariantMap, Variant, VariantSchema>;
 export function matches<VariantMap extends UnknownVariantMap>(
-  adt: ADT<VariantMap> | ADTVariant<string, UnknownArraySchema, VariantMap>,
+  adt: ADT<VariantMap> | ADTVariant<VariantMap, string, UnknownArraySchema>,
   value: UnknownADTValue,
 ): value is ADTValueFor<ADT<VariantMap>>;
 export function matches(
   adtOrVariant:
     | ADT<UnknownVariantMap>
-    | ADTVariant<string, UnknownArraySchema, UnknownVariantMap>,
+    | ADTVariant<UnknownVariantMap, string, UnknownArraySchema>,
   value: UnknownADTValue,
 ) {
   const ADTMatches = adtOrVariant[keys.id] === value[keys.id];
@@ -104,7 +104,7 @@ export function match<
   Variant extends keyof VariantMap & string,
   MatchResults extends Record<NoInfer<Variant>, unknown>,
 >(
-  value: ADTValue<Variant, VariantMap[Variant], VariantMap>,
+  value: ADTValue<VariantMap, Variant, VariantMap[Variant]>,
   cases: {
     [V in Variant]: (
       ...args: StandardSchemaV1.InferOutput<VariantMap[V]>

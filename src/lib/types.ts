@@ -2,9 +2,9 @@ import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type * as keys from "./keys";
 
 export interface ADTValue<
-  Variant extends string,
-  VariantSchema extends StandardSchemaV1,
   VariantMap extends UnknownVariantMap,
+  Variant extends keyof VariantMap & string,
+  VariantSchema extends StandardSchemaV1,
 > {
   values: StandardSchemaV1.InferOutput<VariantSchema>;
   // internal
@@ -21,24 +21,24 @@ export type UnknownVariantMap = Record<string, UnknownArraySchema> &
   Partial<Record<keyof ADTStatic, never>>;
 
 export type UnknownADTValue = ADTValue<
+  UnknownVariantMap,
   string,
-  StandardSchemaV1,
-  UnknownVariantMap
+  StandardSchemaV1
 >;
 
 export interface ADTVariant<
-  Variant extends string,
-  VariantSchema extends UnknownArraySchema,
   VariantMap extends UnknownVariantMap,
+  Variant extends keyof VariantMap & string,
+  VariantSchema extends UnknownArraySchema,
 > {
   /** parse and validate */
   (
     ...values: StandardSchemaV1.InferInput<VariantSchema>
-  ): ADTValue<Variant, VariantSchema, VariantMap>;
+  ): ADTValue<VariantMap, Variant, VariantSchema>;
   /** skip parsing */
   from(
     ...values: StandardSchemaV1.InferOutput<VariantSchema>
-  ): ADTValue<Variant, VariantSchema, VariantMap>;
+  ): ADTValue<VariantMap, Variant, VariantSchema>;
 
   readonly schema: VariantSchema;
 
@@ -52,9 +52,9 @@ export interface ADTVariant<
 
 export type ADTVariants<VariantMap extends UnknownVariantMap> = {
   [Variant in keyof VariantMap & string]: ADTVariant<
+    VariantMap,
     Variant,
-    VariantMap[Variant],
-    VariantMap
+    VariantMap[Variant]
   >;
 };
 
@@ -71,7 +71,7 @@ export type ADTVariantMap<E extends ADT<any>> =
   E extends ADT<infer VariantMap> ? VariantMap : never;
 
 export type ADTValueFor<E extends ADT<any>> = ADTValue<
+  ADTVariantMap<E>,
   keyof ADTVariantMap<E> & string,
-  ADTVariantMap<E>[keyof ADTVariantMap<E>],
-  ADTVariantMap<E>
+  ADTVariantMap<E>[keyof ADTVariantMap<E>]
 >;
