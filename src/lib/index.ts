@@ -28,10 +28,10 @@ function makeADTVariant<
   ): ADTValue<VariantMap, Variant, VariantSchema> {
     return {
       values: input,
+      variant,
       // internal
       [keys.id]: adtStatic[keys.id],
       [keys.type]: "value",
-      [keys.variant]: variant,
     };
   }
 
@@ -45,10 +45,10 @@ function makeADTVariant<
       from: (...args: StandardSchemaV1.InferOutput<VariantSchema>) =>
         from(args),
       schema,
+      variant,
       // internal
       [keys.id]: adtStatic[keys.id],
       [keys.type]: "variant" as const,
-      [keys.variant]: variant,
     },
   );
 }
@@ -95,7 +95,7 @@ export function matches(
 ) {
   const ADTMatches = adtOrVariant[keys.id] === value[keys.id];
   return adtOrVariant[keys.type] === "variant"
-    ? ADTMatches && adtOrVariant[keys.variant] === value[keys.variant]
+    ? ADTMatches && adtOrVariant.variant === value.variant
     : ADTMatches;
 }
 
@@ -113,7 +113,7 @@ export function match<
       : never;
   },
 ): MatchResults[Variant] {
-  const variant = value[keys.variant];
+  const variant = value.variant;
   assert(variant, "value must be an ADT value");
   const matcher = cases[variant];
   assert(matcher, `missing case for ${variant}`);

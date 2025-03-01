@@ -85,9 +85,9 @@ describe.each([
         >({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           from: expect.typeOf("function"),
+          variant,
           [keys.id]: Color[keys.id],
           [keys.type]: "variant",
-          [keys.variant]: variant,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           schema: expect.exactly(variantSchemas[variant]),
         }),
@@ -97,10 +97,10 @@ describe.each([
   it.each(cases)("should create a value for %s", (variant, args) => {
     const value = makeADTValue(Color, variant, args);
     expect(value).toEqual<UnknownADTValue>({
+      variant,
+      values: variantOutputs[variant],
       [keys.id]: Color[keys.id],
       [keys.type]: "value",
-      [keys.variant]: variant,
-      values: variantOutputs[variant],
     });
   });
   if (hasValidation === "with") {
@@ -114,10 +114,10 @@ describe.each([
     (variant, args) => {
       const value = Color[variant].from(...(args as unknown as Array<never>));
       expect(value).toEqual<UnknownADTValue>({
+        variant,
+        values: args,
         [keys.id]: Color[keys.id],
         [keys.type]: "value",
-        [keys.variant]: variant,
-        values: args,
       });
     },
   );

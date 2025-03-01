@@ -6,11 +6,11 @@ export interface ADTValue<
   Variant extends keyof VariantMap & string,
   VariantSchema extends VariantMap[Variant],
 > {
-  values: StandardSchemaV1.InferOutput<VariantSchema>;
+  readonly values: StandardSchemaV1.InferOutput<VariantSchema>;
+  readonly variant: Variant;
   // internal
   [keys.id]: string;
   [keys.type]: "value";
-  [keys.variant]: Variant;
   // type-only
   [keys.variantMap]?: VariantMap;
 }
@@ -41,11 +41,11 @@ export interface ADTVariant<
   ): ADTValue<VariantMap, Variant, VariantSchema>;
 
   readonly schema: VariantSchema;
+  readonly variant: Variant;
 
   // internal
   [keys.id]: string;
   [keys.type]: "variant";
-  [keys.variant]: Variant;
   // type-only
   [keys.variantMap]?: VariantMap;
 }
