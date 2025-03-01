@@ -88,7 +88,7 @@ export function matches(
   value: UnknownEnumValue,
 ) {
   const enumMatches = enOrVariant[keys.id] === value[keys.id];
-  return keys.variant in enOrVariant
+  return enOrVariant[keys.type] === "variant"
     ? enumMatches && enOrVariant[keys.variant] === value[keys.variant]
     : enumMatches;
 }
