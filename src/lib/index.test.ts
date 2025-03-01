@@ -20,10 +20,30 @@ const cases = Object.entries(variantArgs) as ReadonlyArray<
 const variants = Object.keys(variantArgs) as ReadonlyArray<keyof ColorVariants>;
 
 describe("construct", () => {
-  it("should create an enum", () => {
+  it("should create an enum using a proxy", () => {
     for (const variant of variants) {
       expect(Color[variant]).toBeTypeOf("function");
     }
+
+    // @ts-expect-error testing invalid key
+    expect(Color.foo).toBeTypeOf("function");
+
+    expect(Color[keys.id]).toBeTypeOf("string");
+  });
+  it("can pre-construct variants, without a proxy", () => {
+    const Color = construct<ColorVariants>({
+      Rgb: true,
+      Hex: true,
+      Hsl: true,
+    });
+
+    for (const variant of variants) {
+      expect(Color[variant]).toBeTypeOf("function");
+    }
+
+    // @ts-expect-error testing invalid key
+    expect(Color.foo).toBeUndefined();
+
     expect(Color[keys.id]).toBeTypeOf("string");
   });
   it("should cache enum variants", () => {

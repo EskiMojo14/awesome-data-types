@@ -42,12 +42,24 @@ function makeEnumVariant<
   });
 }
 
-export function construct<
-  VariantMap extends UnknownVariantMap,
->(): Enum<VariantMap> {
+export function construct<VariantMap extends UnknownVariantMap>(
+  variants?: Record<keyof VariantMap, true>,
+): Enum<VariantMap> {
   const enumId = nanoid();
 
-  return new Proxy({} as Enum<VariantMap>, {
+  const target = {} as Enum<VariantMap>;
+  target[keys.id] = enumId;
+
+  // if we have runtime variants, we can pre-construct them
+  if (variants) {
+    for (const variant in variants) {
+      Reflect.set(target, variant, makeEnumVariant(enumId, variant));
+    }
+    return target;
+  }
+
+  // otherwise, we can use a proxy to construct them on demand
+  return new Proxy(target, {
     get(cache, variant) {
       if (variant === keys.id) return enumId;
       if (typeof variant !== "string") return;
