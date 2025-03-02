@@ -12,6 +12,7 @@ import type {
   UnknownVariantMap,
   MatchersFor,
   MatcherResults,
+  UnmatchedValues,
 } from "./types";
 import type { AnyFn } from "./utils";
 import { assert } from "./utils";
@@ -116,16 +117,18 @@ function isNestedMatcherMap(
 export function match<
   Value extends UnknownAdtValue,
   Matchers extends MatchersFor<Value>,
+  Catchall = never,
 >(
   { values, variant, [keys.name]: name }: Value,
   cases: Matchers,
-): MatcherResults<Matchers> {
+  catchall?: (...args: UnmatchedValues<Value, Matchers>["values"]) => Catchall,
+): MatcherResults<Value, Matchers> | Catchall {
   const _cases = cases as
     | Record<PropertyKey, AnyFn>
     | Record<string, Record<PropertyKey, AnyFn>>;
   const matchers = isNestedMatcherMap(_cases) ? _cases[name] : _cases;
   assert(matchers, `missing cases for ${name}`);
-  const matcher = matchers[variant];
+  const matcher = matchers[variant] ?? catchall;
   assert(matcher, `missing case for ${String(variant)}`);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return matcher(...values);

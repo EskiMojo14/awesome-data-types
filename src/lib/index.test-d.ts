@@ -75,72 +75,59 @@ describe("matches", () => {
 
 describe("match", () => {
   it("should only require possible cases", () => {
-    // @ts-expect-error missing case
-    match(colorValue, {
-      Rgb(...args) {
-        expectTypeOf(args).toEqualTypeOf<[r: number, g: number, b: number]>();
-      },
-      Hex(...args) {
-        expectTypeOf(args).toEqualTypeOf<[hex: string]>();
-      },
-      Hsl(...args) {
-        expectTypeOf(args).toEqualTypeOf<[h: number, s: number, l: number]>();
-      },
-    });
-    match(multiValue, {
-      Option: {
-        Some(...args) {
-          expectTypeOf(args).toEqualTypeOf<[value: number]>();
-        },
-        None(...args) {
-          expectTypeOf(args).toEqualTypeOf<[]>();
-        },
-      },
-      Color: {
+    match(
+      colorValue,
+      {
         Rgb(...args) {
           expectTypeOf(args).toEqualTypeOf<[r: number, g: number, b: number]>();
-        },
-        Hex(...args) {
-          expectTypeOf(args).toEqualTypeOf<[hex: string]>();
         },
         Hsl(...args) {
           expectTypeOf(args).toEqualTypeOf<[h: number, s: number, l: number]>();
         },
-        HexFromRgb(...args) {
-          expectTypeOf(args).toEqualTypeOf<[hex: string]>();
+      },
+      (...args) => {
+        expectTypeOf(args).toEqualTypeOf<[hex: string]>();
+      },
+    );
+    match(
+      multiValue,
+      {
+        Option: {
+          Some(...args) {
+            expectTypeOf(args).toEqualTypeOf<[value: number]>();
+          },
+          None(...args) {
+            expectTypeOf(args).toEqualTypeOf<[]>();
+          },
+        },
+        Color: {
+          Rgb(...args) {
+            expectTypeOf(args).toEqualTypeOf<
+              [r: number, g: number, b: number]
+            >();
+          },
+          Hex(...args) {
+            expectTypeOf(args).toEqualTypeOf<[hex: string]>();
+          },
+          Hsl(...args) {
+            expectTypeOf(args).toEqualTypeOf<
+              [h: number, s: number, l: number]
+            >();
+          },
+          HexFromRgb(...args) {
+            expectTypeOf(args).toEqualTypeOf<[hex: string]>();
+          },
         },
       },
-    });
+      (...args) => {
+        expectTypeOf(args).toEqualTypeOf<never>();
+      },
+    );
   });
   it("should return the correct type", () => {
-    const result = match(colorValue, {
-      Rgb() {
-        return "rgb" as const;
-      },
-      Hex() {
-        return "hex" as const;
-      },
-      Hsl() {
-        return "hsl" as const;
-      },
-      HexFromRgb() {
-        return "hex from rgb" as const;
-      },
-    });
-    expectTypeOf(result).toEqualTypeOf<
-      "rgb" | "hex" | "hsl" | "hex from rgb"
-    >();
-
-    const result2 = match(multiValue, {
-      Option: {
-        Some() {
-          return "some" as const;
-        },
-        None() {
-          return "none" as const;
-        },
-      },
-      Color: {
+    const result = match(
+      colorValue,
+      {
         Rgb() {
           return "rgb" as const;
         },
@@ -154,9 +141,42 @@ describe("match", () => {
           return "hex from rgb" as const;
         },
       },
-    });
+      () => "catchall" as const,
+    );
+    expectTypeOf(result).toEqualTypeOf<
+      "rgb" | "hex" | "hsl" | "hex from rgb" | "catchall"
+    >();
+
+    const result2 = match(
+      multiValue,
+      {
+        Option: {
+          Some() {
+            return "some" as const;
+          },
+          None() {
+            return "none" as const;
+          },
+        },
+        Color: {
+          Rgb() {
+            return "rgb" as const;
+          },
+          Hex() {
+            return "hex" as const;
+          },
+          Hsl() {
+            return "hsl" as const;
+          },
+          HexFromRgb() {
+            return "hex from rgb" as const;
+          },
+        },
+      },
+      () => "catchall" as const,
+    );
     expectTypeOf(result2).toEqualTypeOf<
-      "some" | "none" | "rgb" | "hex" | "hsl" | "hex from rgb"
+      "some" | "none" | "rgb" | "hex" | "hsl" | "hex from rgb" | "catchall"
     >();
   });
 });

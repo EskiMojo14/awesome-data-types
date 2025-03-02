@@ -190,4 +190,7 @@ describe("match", () => {
       "missing cases for Option",
     );
   });
+  it("should allow catchall", () => {
+    expect(match(red, {}, () => "catchall")).toBe("catchall");
+  });
 });
