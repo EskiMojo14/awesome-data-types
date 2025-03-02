@@ -3,7 +3,15 @@ export type NonReducibleUnknown = NotNullish | null | undefined;
 export type LooseAutocomplete<T> = T | NonReducibleUnknown;
 export type NoInfer<T> = [T][T extends any ? 0 : never];
 export type Override<T, U> = Omit<T, keyof U> & U;
+export type AnyFn = (...args: any) => any;
 
+export type UnionHasOneMember<T, TCopy = T> = [T] extends [never]
+  ? false
+  : T extends unknown
+    ? [TCopy] extends [T]
+      ? true
+      : false
+    : never;
 export function assert(
   condition: unknown,
   message?: string,

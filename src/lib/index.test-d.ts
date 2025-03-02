@@ -16,6 +16,12 @@ const Color = construct("Color", {
 });
 type Color = AdtValueFor<typeof Color>;
 
+const Option = construct("Option", {
+  Some: identity<[value: number]>(),
+  None: identity<[]>(),
+});
+type Option = AdtValueFor<typeof Option>;
+
 it("provides utils", () => {
   expectTypeOf<ValueOf<typeof Color.HexFromRgb>>().toEqualTypeOf<
     [hex: string]
@@ -27,6 +33,7 @@ it("provides utils", () => {
 
 declare const unknownValue: UnknownAdtValue;
 declare const colorValue: Color;
+declare const multiValue: Color | Option;
 
 describe("construct", () => {
   it("preserves schema type accurately", () => {
@@ -80,14 +87,28 @@ describe("match", () => {
         expectTypeOf(args).toEqualTypeOf<[h: number, s: number, l: number]>();
       },
     });
-
-    match(Color.Rgb(0, 0, 0), {
-      Rgb(...args) {
-        expectTypeOf(args).toEqualTypeOf<[r: number, g: number, b: number]>();
+    match(multiValue, {
+      Option: {
+        Some(...args) {
+          expectTypeOf(args).toEqualTypeOf<[value: number]>();
+        },
+        None(...args) {
+          expectTypeOf(args).toEqualTypeOf<[]>();
+        },
       },
-      // @ts-expect-error not possible
-      Hex() {
-        // empty
+      Color: {
+        Rgb(...args) {
+          expectTypeOf(args).toEqualTypeOf<[r: number, g: number, b: number]>();
+        },
+        Hex(...args) {
+          expectTypeOf(args).toEqualTypeOf<[hex: string]>();
+        },
+        Hsl(...args) {
+          expectTypeOf(args).toEqualTypeOf<[h: number, s: number, l: number]>();
+        },
+        HexFromRgb(...args) {
+          expectTypeOf(args).toEqualTypeOf<[hex: string]>();
+        },
       },
     });
   });
@@ -108,6 +129,34 @@ describe("match", () => {
     });
     expectTypeOf(result).toEqualTypeOf<
       "rgb" | "hex" | "hsl" | "hex from rgb"
+    >();
+
+    const result2 = match(multiValue, {
+      Option: {
+        Some() {
+          return "some" as const;
+        },
+        None() {
+          return "none" as const;
+        },
+      },
+      Color: {
+        Rgb() {
+          return "rgb" as const;
+        },
+        Hex() {
+          return "hex" as const;
+        },
+        Hsl() {
+          return "hsl" as const;
+        },
+        HexFromRgb() {
+          return "hex from rgb" as const;
+        },
+      },
+    });
+    expectTypeOf(result2).toEqualTypeOf<
+      "some" | "none" | "rgb" | "hex" | "hsl" | "hex from rgb"
     >();
   });
 });

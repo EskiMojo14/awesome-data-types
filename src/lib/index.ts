@@ -10,7 +10,10 @@ import type {
   UnknownArraySchema,
   UnknownAdtValue,
   UnknownVariantMap,
+  MatchersFor,
+  MatcherResults,
 } from "./types";
+import type { AnyFn } from "./utils";
 import { assert } from "./utils";
 
 function makeAdtVariant<
@@ -101,22 +104,30 @@ export function matches(
     : nameMatches;
 }
 
+function isNestedMatcherMap(
+  cases:
+    | Record<string, Record<PropertyKey, AnyFn>>
+    | Record<PropertyKey, AnyFn>,
+): cases is Record<string, Record<PropertyKey, AnyFn>> {
+  const [firstValue] = Object.values<AnyFn | Record<PropertyKey, AnyFn>>(cases);
+  return typeof firstValue === "object";
+}
+
 export function match<
   Value extends UnknownAdtValue,
-  MatcherResults extends Record<Value["variant"], unknown>,
+  Matchers extends MatchersFor<Value>,
 >(
-  { values, variant }: Value,
-  cases: {
-    [V in keyof MatcherResults]: (
-      ...args: Extract<Value, { variant: V }>["values"]
-    ) => MatcherResults[V];
-  } & Record<Exclude<keyof MatcherResults, Value["variant"]>, never>,
-): MatcherResults[Value["variant"]] {
-  assert(variant, "value must be an ADT value");
-  const matcher = cases[variant as Value["variant"]] as (
-    ...values: Value["values"]
-  ) => MatcherResults[typeof variant];
+  { values, variant, [keys.name]: name }: Value,
+  cases: Matchers,
+): MatcherResults<Matchers> {
+  const _cases = cases as
+    | Record<PropertyKey, AnyFn>
+    | Record<string, Record<PropertyKey, AnyFn>>;
+  const matchers = isNestedMatcherMap(_cases) ? _cases[name] : _cases;
+  assert(matchers, `missing cases for ${name}`);
+  const matcher = matchers[variant];
   assert(matcher, `missing case for ${String(variant)}`);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return matcher(...values);
 }
 

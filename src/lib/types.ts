@@ -1,5 +1,6 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type * as keys from "./keys";
+import type { AnyFn, UnionHasOneMember } from "./utils";
 
 export interface AdtValue<
   Name extends string,
@@ -83,3 +84,25 @@ export type ValueOf<T extends { schema: UnknownArraySchema }> =
   StandardSchemaV1.InferOutput<T["schema"]>;
 export type InputFor<T extends { schema: UnknownArraySchema }> =
   StandardSchemaV1.InferInput<T["schema"]>;
+
+export type MatcherMap<Value extends UnknownAdtValue> = {
+  [N in Value[typeof keys.name]]: {
+    [V in Extract<Value, { [keys.name]: N }>["variant"]]: (
+      ...args: Extract<Value, { variant: V; [keys.name]: N }>["values"]
+    ) => unknown;
+  };
+};
+
+export type MatchersFor<Value extends UnknownAdtValue> =
+  UnionHasOneMember<Value[typeof keys.name]> extends true
+    ? MatcherMap<Value>[Value[typeof keys.name]]
+    : MatcherMap<Value>;
+
+export type MatcherResults<
+  Matchers extends Record<string, AnyFn | Record<PropertyKey, AnyFn>>,
+> =
+  Matchers extends Record<string, Record<PropertyKey, AnyFn>>
+    ? {
+        [K in keyof Matchers]: ReturnType<Matchers[K][keyof Matchers[K]]>;
+      }[keyof Matchers]
+    : ReturnType<(Matchers & Record<PropertyKey, AnyFn>)[keyof Matchers]>;
