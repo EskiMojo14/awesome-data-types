@@ -87,8 +87,8 @@ export type InputFor<T extends { schema: UnknownArraySchema }> =
 
 export type MatcherMap<Value extends UnknownAdtValue> = {
   [N in Value[typeof keys.name]]: {
-    [V in Extract<Value, { [keys.name]: N }>["variant"]]: (
-      ...args: Extract<Value, { variant: V; [keys.name]: N }>["values"]
+    [V in Extract<Value, { [keys.name]: N }> as V["variant"]]: (
+      ...args: V["values"]
     ) => unknown;
   };
 };
