@@ -110,8 +110,8 @@ function isNestedMatcherMap(
     | Record<string, Record<PropertyKey, AnyFn>>
     | Record<PropertyKey, AnyFn>,
 ): cases is Record<string, Record<PropertyKey, AnyFn>> {
-  const [firstValue] = Object.values<AnyFn | Record<PropertyKey, AnyFn>>(cases);
-  return typeof firstValue === "object";
+  for (const key in cases) return typeof cases[key] === "object";
+  return false;
 }
 
 export function match<
