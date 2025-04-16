@@ -1,6 +1,7 @@
+import type { ViteUserConfig } from "vitest/config";
 import { defineConfig } from "vitest/config";
 
-export default defineConfig({
+export const config: ViteUserConfig = defineConfig({
   test: {
     setupFiles: ["./test-setup.ts"],
     typecheck: {
@@ -8,3 +9,5 @@ export default defineConfig({
     },
   },
 });
+
+export default config;

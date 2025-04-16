@@ -18,7 +18,7 @@
     "mix-n-matchers": "^1.8.1",
     "prettier": "^3.5.2",
     "publint": "^0.3.7",
-    "tsup": "^8.4.0",
+    "tsdown": "^0.6.10",
     "typescript-eslint": "^8.25.0",
     "valibot": "1.0.0-rc.2",
     "vitest": "^3.0.7"
@@ -42,7 +42,7 @@
   "scripts": {
     "prepare": "husky",
     "prebuild": "pnpm run type",
-    "build": "tsup",
+    "build": "tsdown",
     "test": "vitest",
     "lint": "eslint",
     "format": "prettier",
@@ -56,7 +56,7 @@
   "lint-staged": {
     "*.{ts,md}": "prettier --write"
   },
-  "tsup": {
+  "tsdown": {
     "entry": [
       "src/index.ts"
     ],
