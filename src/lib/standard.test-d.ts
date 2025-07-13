@@ -1,7 +1,7 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import * as v from "valibot";
 import { describe, expectTypeOf, it } from "vitest";
-import { identity, labelArgs, parseSync, transform } from "./standard";
+import { identity, labelArgs, transform } from "./standard";
 import type { Override } from "./utils";
 
 describe("identity", () => {
@@ -36,12 +36,5 @@ describe("labelArgs", () => {
       >
     >();
     expectTypeOf(schema).toHaveProperty("items");
-  });
-});
-
-describe("parseSync", () => {
-  it("should return the value", () => {
-    const schema = identity<number>();
-    expectTypeOf(parseSync(schema, 1)).toEqualTypeOf<number>();
   });
 });

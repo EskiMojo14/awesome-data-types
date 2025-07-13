@@ -1,6 +1,6 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
+import { parseSync } from "@standard-schema/utils";
 import * as keys from "./keys";
-import { parseSync } from "./standard";
 import type {
   Adt,
   AdtStatic,

@@ -1,9 +1,9 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
+import type { StandardSchemaV1Dictionary } from "@standard-schema/utils";
 import { SchemaError } from "@standard-schema/utils";
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 import * as keys from "./keys";
-import type { StandardSchemaV1Dictionary } from "./standard";
 import { identity, transform } from "./standard";
 import type {
   UnknownVariantMap,

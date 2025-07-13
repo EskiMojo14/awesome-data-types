@@ -1,7 +1,6 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { SchemaError } from "@standard-schema/utils";
 import type { UnknownArraySchema } from "./types";
-import type { LooseAutocomplete, Override } from "./utils";
+import type { Override } from "./utils";
 
 /**
  * Creates a schema that transforms the value.
@@ -43,31 +42,4 @@ export function labelArgs<
 export function labelArgs(schema?: UnknownArraySchema) {
   if (schema) return schema;
   return (schema: UnknownArraySchema) => schema;
-}
-
-export function parseSync<Schema extends StandardSchemaV1>(
-  schema: Schema,
-  value: LooseAutocomplete<StandardSchemaV1.InferInput<Schema>>,
-): StandardSchemaV1.InferOutput<Schema> {
-  const result = schema["~standard"].validate(value);
-  if (result instanceof Promise)
-    throw new TypeError("validation must be synchronous");
-  if (result.issues) throw new SchemaError(result.issues);
-  return result.value;
-}
-
-export type StandardSchemaV1Dictionary<
-  Input extends Record<string, unknown> = Record<string, unknown>,
-  Output extends Record<keyof Input, unknown> = Input,
-> = {
-  [K in keyof Input]: StandardSchemaV1<Input[K], Output[K]>;
-};
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace StandardSchemaV1Dictionary {
-  export type InferInput<T extends StandardSchemaV1Dictionary> = {
-    [K in keyof T]: StandardSchemaV1.InferInput<T[K]>;
-  };
-  export type InferOutput<T extends StandardSchemaV1Dictionary> = {
-    [K in keyof T]: StandardSchemaV1.InferOutput<T[K]>;
-  };
 }
