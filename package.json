@@ -21,7 +21,7 @@
     "tsdown": "^0.6.10",
     "typescript-eslint": "^8.25.0",
     "valibot": "1.0.0-rc.2",
-    "vitest": "^3.0.7"
+    "vitest": "^4"
   },
   "peerDependencies": {
     "typescript": "^5.8.2"
@@ -67,7 +67,7 @@
     ],
     "dts": true
   },
-  "packageManager": "pnpm@10.5.2+sha256.79a98daa90248b50815e31460790f118c56fe099113370826caa0153be6daba5",
+  "packageManager": "pnpm@10.19.0+sha512.c9fc7236e92adf5c8af42fd5bf1612df99c2ceb62f27047032f4720b33f8eacdde311865e91c411f2774f618d82f320808ecb51718bfa82c060c4ba7c76a32b8",
   "dependencies": {
     "@standard-schema/spec": "^1.0.0",
     "@standard-schema/utils": "file:../standard-schema/packages/utils"
