@@ -146,6 +146,20 @@ const colorString = ADT.match(red, {
 });
 ```
 
+A catchall case can be provided as a function. Its input will be narrowed to the remaining possible cases.
+
+```ts
+const colorString = ADT.match(
+  red,
+  {
+    Rgb: (r, g, b) => `rgb(${r}, ${g}, ${b})`,
+    Hsl: (h, s, l) => `hsl(${h}, ${s}%, ${l}%)`,
+  },
+  // remaining cases are both hex
+  (hex) => hex,
+);
+```
+
 ## Schema helpers
 
 ### `identity`
