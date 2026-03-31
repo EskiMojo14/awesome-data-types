@@ -18,7 +18,7 @@ const config: UserConfig = defineConfig({
   pack: {
     entry: ["src/index.ts"],
     sourcemap: true,
-    format: ["esm", "cjs"],
+    format: ["esm"],
     dts: true,
   },
   fmt: {},
