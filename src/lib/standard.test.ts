@@ -47,7 +47,7 @@ describe("parseSync", () => {
       "~standard": {
         version: 1,
         vendor: "awesome-data-types",
-        validate: () => ({ issues: [] }),
+        validate: () => ({ issues: [{ message: "error" }] }),
       },
     };
     expect(() => parseSync(failSchema, "1")).toThrow(SchemaError);

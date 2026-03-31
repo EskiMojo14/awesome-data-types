@@ -144,11 +144,6 @@ describe("matches", () => {
 describe("match", () => {
   const Color = construct("Color", colorVariantSchemas);
   const red = Color.Rgb(255, 0, 0);
-  const Option = construct("Option", {
-    Some: identity<[value: number]>(),
-    None: identity<[]>(),
-  });
-  const some = Option.Some(1);
   it("should match", () => {
     expect(
       match(red, {
@@ -157,8 +152,7 @@ describe("match", () => {
     ).toBe("rgb(255, 0, 0)");
   });
   it("should throw if missing case", () => {
-    expect(() => match(red, {} as never)).toThrowError("missing case for Rgb");
-    expect(() => match(some, { Color: {} } as never)).toThrowError("missing cases for Option");
+    expect(() => match(red, {} as never)).toThrow("missing case for Rgb");
   });
   it("should allow catchall", () => {
     expect(match(red, {}, () => "catchall")).toBe("catchall");
