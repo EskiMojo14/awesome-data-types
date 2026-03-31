@@ -26,7 +26,8 @@
     "attw": "attw",
     "publint": "publint",
     "type": "tsc",
-    "prepack": "pnpm run publint"
+    "prepack": "pnpm run publint",
+    "knip": "knip"
   },
   "dependencies": {
     "@standard-schema/spec": "^1.0.0",
@@ -34,18 +35,12 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.4",
-    "@eslint/js": "^9.21.0",
     "@types/bun": "latest",
-    "@typescript-eslint/parser": "^8.25.0",
-    "eslint": "^9.21.0",
-    "eslint-import-resolver-typescript": "^3.8.3",
-    "eslint-plugin-import-x": "^4.6.1",
-    "eslint-plugin-vitest": "^0.5.4",
-    "globals": "^16.0.0",
-    "jiti": "^2.4.2",
+    "@types/node": "^25.5.0",
+    "knip": "^6.1.1",
     "mix-n-matchers": "^1.8.1",
     "publint": "^0.3.7",
-    "typescript-eslint": "^8.25.0",
+    "typescript": "^6.0.2",
     "valibot": "1.0.0-rc.2",
     "vite-plus": "latest",
     "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
