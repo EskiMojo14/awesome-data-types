@@ -98,6 +98,19 @@ export function matches(
     : nameMatches;
 }
 
+/* #__NO_SIDE_EFFECTS__ */
+export function unwrap<
+  Name extends string,
+  Variant extends PropertyKey,
+  VariantSchema extends UnknownArraySchema,
+>(
+  variant: AdtVariant<Name, Variant, VariantSchema>,
+  value: UnknownAdtValue,
+): StandardSchemaV1.InferOutput<VariantSchema> {
+  assert(matches(variant, value), "value does not match variant");
+  return value.values;
+}
+
 export function match<
   Value extends UnknownAdtValue,
   Matchers extends MatcherMap<Value>,

@@ -2,7 +2,7 @@ import * as v from "valibot";
 import { describe, expectTypeOf, it } from "vite-plus/test";
 import { identity, transform } from "./standard";
 import type { AdtValueFor, UnknownAdtValue, ValueOf, InputFor } from "./types";
-import { construct, matches, match } from "./index";
+import { construct, matches, match, unwrap } from "./index";
 
 declare function rgbToHex(rgb: [number, number, number]): string;
 
@@ -93,5 +93,12 @@ describe("match", () => {
       () => "catchall" as const,
     );
     expectTypeOf(result).toEqualTypeOf<"rgb" | "hex" | "hsl" | "hex from rgb" | "catchall">();
+  });
+});
+
+describe("unwrap", () => {
+  it("should unwrap", () => {
+    const red = Color.Rgb(255, 0, 0);
+    expectTypeOf(unwrap(Color.Rgb, red)).toEqualTypeOf<[r: number, g: number, b: number]>();
   });
 });

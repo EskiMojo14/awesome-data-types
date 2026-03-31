@@ -14,7 +14,7 @@ import type {
   UnknownAdtValue,
 } from "./types";
 import { objectEntries, objectKeys } from "./utils";
-import { construct, isAdtValue, match, matches } from "./index";
+import { construct, isAdtValue, match, matches, unwrap } from "./index";
 
 function rgbToHex([r, g, b]: [number, number, number]) {
   return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
@@ -156,5 +156,17 @@ describe("match", () => {
   });
   it("should allow catchall", () => {
     expect(match(red, {}, () => "catchall")).toBe("catchall");
+  });
+});
+
+describe("unwrap", () => {
+  const Color = construct("Color", colorVariantSchemas);
+  it("should unwrap", () => {
+    const red = Color.Rgb(255, 0, 0);
+    expect(unwrap(Color.Rgb, red)).toEqual([255, 0, 0]);
+  });
+  it("should throw if wrong variant", () => {
+    const red = Color.Rgb(255, 0, 0);
+    expect(() => unwrap(Color.Hex, red)).toThrow("value does not match variant");
   });
 });
