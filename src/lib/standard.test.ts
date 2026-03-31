@@ -1,6 +1,7 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { describe, expect, it } from "vite-plus/test";
 import { identity, labelArgs, parseSync, transform } from "./standard";
+import { SchemaError } from "@standard-schema/utils";
 
 describe("identity", () => {
   it("should return the same value", () => {
@@ -37,8 +38,8 @@ describe("parseSync", () => {
         validate: (value) => Promise.resolve({ value }),
       },
     };
-    expect(() => parseSync(asyncSchema, 1)).toThrowError(
-      "validation must be synchronous",
+    expect(() => parseSync(asyncSchema, 1)).toThrow(
+      new TypeError("validation must be synchronous"),
     );
   });
   it("should throw if the validation fails", () => {
@@ -49,6 +50,6 @@ describe("parseSync", () => {
         validate: () => ({ issues: [] }),
       },
     };
-    expect(() => parseSync(failSchema, "1")).toThrowError();
+    expect(() => parseSync(failSchema, "1")).toThrow(SchemaError);
   });
 });

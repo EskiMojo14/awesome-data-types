@@ -10,9 +10,7 @@ const Color = construct("Color", {
   Rgb: identity<[r: number, g: number, b: number]>(),
   Hex: identity<[hex: string]>(),
   Hsl: identity<[h: number, s: number, l: number]>(),
-  HexFromRgb: transform(
-    (rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)],
-  ),
+  HexFromRgb: transform((rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)]),
 });
 type Color = AdtValueFor<typeof Color>;
 
@@ -23,9 +21,7 @@ const Option = construct("Option", {
 type Option = AdtValueFor<typeof Option>;
 
 it("provides utils", () => {
-  expectTypeOf<ValueOf<typeof Color.HexFromRgb>>().toEqualTypeOf<
-    [hex: string]
-  >();
+  expectTypeOf<ValueOf<typeof Color.HexFromRgb>>().toEqualTypeOf<[hex: string]>();
   expectTypeOf<InputFor<typeof Color.HexFromRgb>>().toEqualTypeOf<
     [r: number, g: number, b: number]
   >();
@@ -53,21 +49,15 @@ describe("matches", () => {
     if (matches(Color, unknownValue)) {
       expectTypeOf(unknownValue).toEqualTypeOf<Color>();
       expectTypeOf(unknownValue.values).toEqualTypeOf<
-        | [r: number, g: number, b: number]
-        | [hex: string]
-        | [h: number, s: number, l: number]
+        [r: number, g: number, b: number] | [hex: string] | [h: number, s: number, l: number]
       >();
     }
     if (matches(Color.Rgb, unknownValue)) {
       expectTypeOf(unknownValue).toEqualTypeOf<ReturnType<typeof Color.Rgb>>();
-      expectTypeOf(unknownValue.values).toEqualTypeOf<
-        [r: number, g: number, b: number]
-      >();
+      expectTypeOf(unknownValue.values).toEqualTypeOf<[r: number, g: number, b: number]>();
     }
     if (matches(Color.HexFromRgb, unknownValue)) {
-      expectTypeOf(unknownValue).toEqualTypeOf<
-        ReturnType<typeof Color.HexFromRgb>
-      >();
+      expectTypeOf(unknownValue).toEqualTypeOf<ReturnType<typeof Color.HexFromRgb>>();
       expectTypeOf(unknownValue.values).toEqualTypeOf<[hex: string]>();
     }
   });
@@ -102,17 +92,13 @@ describe("match", () => {
         },
         Color: {
           Rgb(...args) {
-            expectTypeOf(args).toEqualTypeOf<
-              [r: number, g: number, b: number]
-            >();
+            expectTypeOf(args).toEqualTypeOf<[r: number, g: number, b: number]>();
           },
           Hex(...args) {
             expectTypeOf(args).toEqualTypeOf<[hex: string]>();
           },
           Hsl(...args) {
-            expectTypeOf(args).toEqualTypeOf<
-              [h: number, s: number, l: number]
-            >();
+            expectTypeOf(args).toEqualTypeOf<[h: number, s: number, l: number]>();
           },
           HexFromRgb(...args) {
             expectTypeOf(args).toEqualTypeOf<[hex: string]>();
@@ -143,9 +129,7 @@ describe("match", () => {
       },
       () => "catchall" as const,
     );
-    expectTypeOf(result).toEqualTypeOf<
-      "rgb" | "hex" | "hsl" | "hex from rgb" | "catchall"
-    >();
+    expectTypeOf(result).toEqualTypeOf<"rgb" | "hex" | "hsl" | "hex from rgb" | "catchall">();
 
     const result2 = match(
       multiValue,

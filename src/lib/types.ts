@@ -27,9 +27,7 @@ export interface AdtVariant<
   VariantSchema extends UnknownArraySchema,
 > {
   /** parse and validate */
-  (
-    ...values: StandardSchemaV1.InferInput<VariantSchema>
-  ): AdtValue<Name, Variant, VariantSchema>;
+  (...values: StandardSchemaV1.InferInput<VariantSchema>): AdtValue<Name, Variant, VariantSchema>;
   /** skip parsing */
   from(
     ...values: StandardSchemaV1.InferOutput<VariantSchema>
@@ -43,17 +41,11 @@ export interface AdtVariant<
   readonly [keys.type]: "variant";
 }
 
-export type AdtVariants<
-  Name extends string,
-  VariantMap extends UnknownVariantMap,
-> = {
+export type AdtVariants<Name extends string, VariantMap extends UnknownVariantMap> = {
   [Variant in keyof VariantMap]: AdtVariant<Name, Variant, VariantMap[Variant]>;
 };
 
-export interface AdtStatic<
-  Name extends string,
-  VariantMap extends UnknownVariantMap,
-> {
+export interface AdtStatic<Name extends string, VariantMap extends UnknownVariantMap> {
   // dissuade
   readonly [keys.name]: Name;
   readonly [keys.type]: "ADT";
@@ -63,10 +55,11 @@ export interface AdtStatic<
   };
 }
 
-export type Adt<
-  Name extends string,
-  VariantMap extends UnknownVariantMap,
-> = AdtVariants<Name, VariantMap> & AdtStatic<Name, VariantMap>;
+export type Adt<Name extends string, VariantMap extends UnknownVariantMap> = AdtVariants<
+  Name,
+  VariantMap
+> &
+  AdtStatic<Name, VariantMap>;
 
 export type AdtVariantMap<E extends Adt<any, any>> = NonNullable<
   E[typeof keys.types]
@@ -80,19 +73,19 @@ export type AdtValueFor<E extends Adt<any, any>> = {
   >;
 }[keyof AdtVariantMap<E>];
 
-export type ValueOf<T extends { schema: UnknownArraySchema }> =
-  StandardSchemaV1.InferOutput<T["schema"]>;
-export type InputFor<T extends { schema: UnknownArraySchema }> =
-  StandardSchemaV1.InferInput<T["schema"]>;
+export type ValueOf<T extends { schema: UnknownArraySchema }> = StandardSchemaV1.InferOutput<
+  T["schema"]
+>;
+export type InputFor<T extends { schema: UnknownArraySchema }> = StandardSchemaV1.InferInput<
+  T["schema"]
+>;
 
 type VariantCases = Partial<Record<PropertyKey, AnyFn>>;
 type NameCases = Partial<Record<string, VariantCases>>;
 
 export type MatcherMap<Value extends UnknownAdtValue> = {
   [N in Value[typeof keys.name]]?: {
-    [V in Extract<Value, { [keys.name]: N }> as V["variant"]]?: (
-      ...args: V["values"]
-    ) => unknown;
+    [V in Extract<Value, { [keys.name]: N }> as V["variant"]]?: (...args: V["values"]) => unknown;
   };
 };
 
@@ -101,17 +94,16 @@ export type MatchersFor<Value extends UnknownAdtValue> =
     ? NonNullable<MatcherMap<Value>[Value[typeof keys.name]]>
     : MatcherMap<Value>;
 
-export type MatchedValues<Matchers extends VariantCases | NameCases> =
-  Matchers extends NameCases
-    ? {
-        [K in keyof Matchers]: {
-          [keys.name]: K;
-          variant: keyof Matchers[K];
-        };
-      }[keyof Matchers]
-    : {
-        variant: keyof Matchers;
+export type MatchedValues<Matchers extends VariantCases | NameCases> = Matchers extends NameCases
+  ? {
+      [K in keyof Matchers]: {
+        [keys.name]: K;
+        variant: keyof Matchers[K];
       };
+    }[keyof Matchers]
+  : {
+      variant: keyof Matchers;
+    };
 
 export type UnmatchedValues<
   Value extends UnknownAdtValue,

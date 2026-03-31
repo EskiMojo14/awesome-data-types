@@ -46,8 +46,7 @@ function makeAdtVariant<
       return from(parseSync(schema, input));
     },
     {
-      from: (...args: StandardSchemaV1.InferOutput<VariantSchema>) =>
-        from(args),
+      from: (...args: StandardSchemaV1.InferOutput<VariantSchema>) => from(args),
       schema,
       // dissuade
       [keys.name]: adtStatic[keys.name],
@@ -58,10 +57,10 @@ function makeAdtVariant<
 }
 
 /* #__NO_SIDE_EFFECTS__ */
-export function construct<
-  const Name extends string,
-  const VariantMap extends UnknownVariantMap,
->(name: Name, variants: VariantMap): Adt<Name, VariantMap> {
+export function construct<const Name extends string, const VariantMap extends UnknownVariantMap>(
+  name: Name,
+  variants: VariantMap,
+): Adt<Name, VariantMap> {
   const adtStatic: AdtStatic<Name, VariantMap> = {
     [keys.name]: name,
     [keys.type]: "ADT",
@@ -70,11 +69,7 @@ export function construct<
   const target = adtStatic as Adt<Name, VariantMap>;
 
   for (const variant in variants) {
-    target[variant] = makeAdtVariant(
-      adtStatic,
-      variant,
-      variants[variant] as never,
-    ) as never;
+    target[variant] = makeAdtVariant(adtStatic, variant, variants[variant] as never) as never;
   }
 
   return target;
@@ -89,17 +84,12 @@ export function matches<
   variant: AdtVariant<Name, Variant, VariantSchema>,
   value: UnknownAdtValue,
 ): value is AdtValue<Name, Variant, VariantSchema>;
-export function matches<
-  Name extends string,
-  VariantMap extends UnknownVariantMap,
->(
+export function matches<Name extends string, VariantMap extends UnknownVariantMap>(
   adt: Adt<Name, VariantMap>,
   value: UnknownAdtValue,
 ): value is AdtValueFor<Adt<Name, VariantMap>>;
 export function matches(
-  adtOrVariant:
-    | Adt<string, any>
-    | AdtVariant<string, PropertyKey, UnknownArraySchema>,
+  adtOrVariant: Adt<string, any> | AdtVariant<string, PropertyKey, UnknownArraySchema>,
   value: UnknownAdtValue,
 ) {
   const nameMatches = adtOrVariant[keys.name] === value[keys.name];
@@ -109,9 +99,7 @@ export function matches(
 }
 
 function isNestedMatcherMap(
-  cases:
-    | Record<string, Record<PropertyKey, AnyFn>>
-    | Record<PropertyKey, AnyFn>,
+  cases: Record<string, Record<PropertyKey, AnyFn>> | Record<PropertyKey, AnyFn>,
 ): cases is Record<string, Record<PropertyKey, AnyFn>> {
   for (const key in cases) return typeof cases[key] === "object";
   return false;
@@ -127,9 +115,7 @@ export function match<
   cases: Matchers,
   catchall?: (...args: UnmatchedValues<Value, Matchers>["values"]) => Catchall,
 ): MatcherResults<Value, Matchers> | Catchall {
-  const _cases = cases as
-    | Record<PropertyKey, AnyFn>
-    | Record<string, Record<PropertyKey, AnyFn>>;
+  const _cases = cases as Record<PropertyKey, AnyFn> | Record<string, Record<PropertyKey, AnyFn>>;
   const matchers = isNestedMatcherMap(_cases) ? _cases[name] : _cases;
   assert(matchers, `missing cases for ${name}`);
   const matcher = matchers[variant] ?? catchall;

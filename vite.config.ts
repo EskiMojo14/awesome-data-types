@@ -21,11 +21,7 @@ const config: UserConfig = defineConfig({
     format: ["esm", "cjs"],
     dts: true,
   },
-  fmt: {
-    printWidth: 80,
-    sortPackageJson: false,
-    ignorePatterns: [],
-  },
+  fmt: {},
   test: {
     setupFiles: ["./test-setup.ts"],
     typecheck: {

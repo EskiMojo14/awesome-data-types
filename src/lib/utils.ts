@@ -12,16 +12,11 @@ export type UnionHasOneMember<T, TCopy = T> = [T] extends [never]
       : false
     : never;
 
-export function assert(
-  condition: unknown,
-  message?: string,
-): asserts condition {
+export function assert(condition: unknown, message?: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
-export const objectKeys = Object.keys as <Obj extends object>(
-  obj: Obj,
-) => Array<keyof Obj>;
+export const objectKeys = Object.keys as <Obj extends object>(obj: Obj) => Array<keyof Obj>;
 
 export const objectEntries = Object.entries as <Obj extends object>(
   obj: Obj,

@@ -22,18 +22,13 @@ describe("labelArgs", () => {
   const baseSchema = v.tuple([v.number(), v.number(), v.number()]);
   it("should return a wrapped schema with correct types", () => {
     const schema = labelArgs<[r: number, g: number, b: number]>(baseSchema);
-    expectTypeOf(schema).toEqualTypeOf<
-      StandardSchemaV1<[r: number, g: number, b: number]>
-    >();
+    expectTypeOf(schema).toEqualTypeOf<StandardSchemaV1<[r: number, g: number, b: number]>>();
     expectTypeOf(schema).not.toHaveProperty("items");
   });
   it("should return original schema with corrected standard schema", () => {
     const schema = labelArgs<[r: number, g: number, b: number]>()(baseSchema);
     expectTypeOf(schema).toEqualTypeOf<
-      Override<
-        typeof baseSchema,
-        StandardSchemaV1<[r: number, g: number, b: number]>
-      >
+      Override<typeof baseSchema, StandardSchemaV1<[r: number, g: number, b: number]>>
     >();
     expectTypeOf(schema).toHaveProperty("items");
   });

@@ -22,9 +22,7 @@ function rgbToHex([r, g, b]: [number, number, number]) {
 
 const identityColorVariantSchemas = {
   Rgb: identity<[r: number, g: number, b: number]>(),
-  RgbToHex: transform(
-    (rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)],
-  ),
+  RgbToHex: transform((rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)]),
   Hex: identity<[hex: string]>(),
   Hsl: identity<[h: number, s: number, l: number]>(),
 };
@@ -40,18 +38,14 @@ const colorVariantSchemas: typeof identityColorVariantSchemas = {
   Hsl: v.tuple([v.number(), v.number(), v.number()]),
 };
 
-const variantInputs: StandardSchemaV1Dictionary.InferInput<
-  typeof identityColorVariantSchemas
-> = {
+const variantInputs: StandardSchemaV1Dictionary.InferInput<typeof identityColorVariantSchemas> = {
   Rgb: [0, 0, 0],
   RgbToHex: [0, 0, 0],
   Hex: ["#000"],
   Hsl: [0, 0, 0],
 };
 
-const variantOutputs: StandardSchemaV1Dictionary.InferOutput<
-  typeof identityColorVariantSchemas
-> = {
+const variantOutputs: StandardSchemaV1Dictionary.InferOutput<typeof identityColorVariantSchemas> = {
   Rgb: variantInputs.Rgb,
   RgbToHex: ["#000"],
   Hex: variantInputs.Hex,
@@ -80,9 +74,7 @@ describe.each([
     for (const variant of variants) {
       expect(Color[variant]).toBeTypeOf("function");
       expect(Color[variant]).toEqual(
-        expect.objectContaining<
-          Omit<AdtVariant<string, string, UnknownArraySchema>, never>
-        >({
+        expect.objectContaining<Omit<AdtVariant<string, string, UnknownArraySchema>, never>>({
           from: expect.typeOf("function"),
           schema: expect.exactly(variantSchemas[variant]),
           // dissuade
@@ -108,18 +100,15 @@ describe.each([
       expect(() => Color.Hex(0, 0, 256)).toThrowError(SchemaError);
     });
   }
-  it.each(objectEntries(variantOutputs))(
-    "should create a value from %s",
-    (variant, args) => {
-      const value = Color[variant].from(...(args as unknown as Array<never>));
-      expect(value).toEqual<UnknownAdtValue>({
-        variant,
-        values: args,
-        [keys.name]: Color[keys.name],
-        [keys.type]: "value",
-      });
-    },
-  );
+  it.each(objectEntries(variantOutputs))("should create a value from %s", (variant, args) => {
+    const value = Color[variant].from(...(args as unknown as Array<never>));
+    expect(value).toEqual<UnknownAdtValue>({
+      variant,
+      values: args,
+      [keys.name]: Color[keys.name],
+      [keys.type]: "value",
+    });
+  });
 });
 
 describe("isAdtValue", () => {
@@ -184,9 +173,7 @@ describe("match", () => {
   });
   it("should throw if missing case", () => {
     expect(() => match(red, {} as never)).toThrowError("missing case for Rgb");
-    expect(() => match(some, { Color: {} } as never)).toThrowError(
-      "missing cases for Option",
-    );
+    expect(() => match(some, { Color: {} } as never)).toThrowError("missing cases for Option");
   });
   it("should allow catchall", () => {
     expect(match(red, {}, () => "catchall")).toBe("catchall");

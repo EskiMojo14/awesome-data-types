@@ -10,13 +10,7 @@ ADT values are JSON serializable, as long as the data inside is.
 import * as v from "valibot";
 import { rgbToHex } from "./utils";
 import type { AdtValueFor, UnknownAdtValue } from "awesome-data-types";
-import {
-  construct,
-  matches,
-  identity,
-  transform,
-  match,
-} from "awesome-data-types";
+import { construct, matches, identity, transform, match } from "awesome-data-types";
 
 // for runtime validation
 const Color = construct("Color", {
@@ -37,9 +31,7 @@ const Color = construct("Color", {
   Hex: identity<[hex: string]>(),
   Hsl: identity<[h: number, s: number, l: number]>(),
   // supports transforming inputs
-  HexFromRgb: transform(
-    (rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)],
-  ),
+  HexFromRgb: transform((rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)]),
 });
 
 type Color = AdtValueFor<typeof Color>;

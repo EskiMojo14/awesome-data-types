@@ -6,9 +6,7 @@ import type { LooseAutocomplete, Override } from "./utils";
 /**
  * Creates a schema that transforms the value.
  */
-export const transform = <T, U>(
-  transform: (value: T) => U,
-): StandardSchemaV1<T, U> => ({
+export const transform = <T, U>(transform: (value: T) => U): StandardSchemaV1<T, U> => ({
   "~standard": {
     version: 1,
     vendor: "awesome-data-types",
@@ -37,9 +35,7 @@ export function labelArgs<
   OutputArgs extends {
     [K in keyof InputArgs]: unknown;
   } = InputArgs,
->(
-  schema: StandardSchemaV1<InputArgs, OutputArgs>,
-): StandardSchemaV1<InputArgs, OutputArgs>;
+>(schema: StandardSchemaV1<InputArgs, OutputArgs>): StandardSchemaV1<InputArgs, OutputArgs>;
 export function labelArgs(schema?: UnknownArraySchema) {
   if (schema) return schema;
   return (schema: UnknownArraySchema) => schema;
@@ -50,8 +46,7 @@ export function parseSync<Schema extends StandardSchemaV1>(
   value: LooseAutocomplete<StandardSchemaV1.InferInput<Schema>>,
 ): StandardSchemaV1.InferOutput<Schema> {
   const result = schema["~standard"].validate(value);
-  if (result instanceof Promise)
-    throw new TypeError("validation must be synchronous");
+  if (result instanceof Promise) throw new TypeError("validation must be synchronous");
   if (result.issues) throw new SchemaError(result.issues);
   return result.value;
 }
