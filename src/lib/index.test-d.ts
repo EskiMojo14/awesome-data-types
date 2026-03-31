@@ -1,16 +1,18 @@
 import * as v from "valibot";
 import { describe, expectTypeOf, it } from "vite-plus/test";
-import { identity, transform } from "./standard";
+import * as ADTS from "./standard";
 import type { AdtValueFor, UnknownAdtValue, ValueOf, InputFor } from "./types";
-import { construct, matches, match, unwrap, parse } from ".";
+import * as ADT from ".";
 
 declare function rgbToHex(rgb: [number, number, number]): string;
 
-const Color = construct("Color", {
-  Rgb: identity<[r: number, g: number, b: number]>(),
-  Hex: identity<[hex: string]>(),
-  Hsl: identity<[h: number, s: number, l: number]>(),
-  HexFromRgb: transform((rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)]),
+const Color = ADT.construct("Color", {
+  Rgb: ADTS.identity<[r: number, g: number, b: number]>(),
+  Hex: ADTS.identity<[hex: string]>(),
+  Hsl: ADTS.identity<[h: number, s: number, l: number]>(),
+  HexFromRgb: ADTS.transform((rgb: [r: number, g: number, b: number]): [hex: string] => [
+    rgbToHex(rgb),
+  ]),
 });
 type Color = AdtValueFor<typeof Color>;
 
@@ -28,7 +30,20 @@ describe("construct", () => {
   it("preserves schema type accurately", () => {
     const someSchema = v.tuple([v.number()]);
     const noneSchema = v.tuple([]);
-    const Option = construct("Option", {
+    const Option = ADT.construct("Option", {
+      Some: someSchema,
+      None: noneSchema,
+    });
+    expectTypeOf(Option.Some.schema).toEqualTypeOf<typeof someSchema>();
+    expectTypeOf(Option.None.schema).toEqualTypeOf<typeof noneSchema>();
+  });
+});
+
+describe("constructAsync", () => {
+  it("preserves schema type accurately", () => {
+    const someSchema = v.tuple([v.number()]);
+    const noneSchema = v.tuple([]);
+    const Option = ADT.constructAsync("Option", {
       Some: someSchema,
       None: noneSchema,
     });
@@ -39,17 +54,17 @@ describe("construct", () => {
 
 describe("matches", () => {
   it("should act as type guard", () => {
-    if (matches(Color, unknownValue)) {
+    if (ADT.matches(Color, unknownValue)) {
       expectTypeOf(unknownValue).toEqualTypeOf<Color>();
       expectTypeOf(unknownValue.values).toEqualTypeOf<
         [r: number, g: number, b: number] | [hex: string] | [h: number, s: number, l: number]
       >();
     }
-    if (matches(Color.Rgb, unknownValue)) {
+    if (ADT.matches(Color.Rgb, unknownValue)) {
       expectTypeOf(unknownValue).toEqualTypeOf<ReturnType<typeof Color.Rgb>>();
       expectTypeOf(unknownValue.values).toEqualTypeOf<[r: number, g: number, b: number]>();
     }
-    if (matches(Color.HexFromRgb, unknownValue)) {
+    if (ADT.matches(Color.HexFromRgb, unknownValue)) {
       expectTypeOf(unknownValue).toEqualTypeOf<ReturnType<typeof Color.HexFromRgb>>();
       expectTypeOf(unknownValue.values).toEqualTypeOf<[hex: string]>();
     }
@@ -58,7 +73,7 @@ describe("matches", () => {
 
 describe("match", () => {
   it("should only require possible cases", () => {
-    match(
+    ADT.match(
       colorValue,
       {
         Rgb(...args) {
@@ -74,7 +89,7 @@ describe("match", () => {
     );
   });
   it("should return the correct type", () => {
-    const result = match(
+    const result = ADT.match(
       colorValue,
       {
         Rgb() {
@@ -95,7 +110,7 @@ describe("match", () => {
     expectTypeOf(result).toEqualTypeOf<"rgb" | "hex" | "hsl" | "hex from rgb" | "catchall">();
   });
   it("allows async handlers", async () => {
-    const result = await match(
+    const result = await ADT.match(
       colorValue,
       {
         Rgb() {
@@ -120,14 +135,14 @@ describe("match", () => {
 describe("unwrap", () => {
   it("should unwrap", () => {
     const red = Color.Rgb(255, 0, 0);
-    expectTypeOf(unwrap(Color.Rgb, red)).toEqualTypeOf<[r: number, g: number, b: number]>();
+    expectTypeOf(ADT.unwrap(Color.Rgb, red)).toEqualTypeOf<[r: number, g: number, b: number]>();
   });
 });
 
 describe("parse", () => {
   it("should parse", () => {
     const red: unknown = Color.Rgb(255, 0, 0);
-    const parsed = parse(Color, red);
+    const parsed = ADT.parse(Color, red);
     expectTypeOf(parsed).toEqualTypeOf<Color>();
   });
 });

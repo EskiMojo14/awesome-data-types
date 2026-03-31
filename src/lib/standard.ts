@@ -51,6 +51,15 @@ export function parseSync<Schema extends StandardSchemaV1>(
   return result.value;
 }
 
+export async function parse<Schema extends StandardSchemaV1>(
+  schema: Schema,
+  value: LooseAutocomplete<StandardSchemaV1.InferInput<Schema>>,
+): Promise<StandardSchemaV1.InferOutput<Schema>> {
+  const result = await schema["~standard"].validate(value);
+  if (result.issues) throw new SchemaError(result.issues);
+  return result.value;
+}
+
 export type StandardSchemaV1Dictionary<
   Input extends Record<string, unknown> = Record<string, unknown>,
   Output extends Record<keyof Input, unknown> = Input,

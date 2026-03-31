@@ -80,6 +80,8 @@ function handleColor(color: Color) {
 
 Creates an ADT from a map of variant schemas. Note that each variant must be an array schema (to match the array of arguments). First parameter is the name of the ADT, which should be unique.
 
+Schema validation _must_ be synchronous. If you need asynchronous validation, use `constructAsync` instead.
+
 ```ts
 const Color = ADT.construct("Color", {
   Rgb: ADT.identity<[r: number, g: number, b: number]>(),
@@ -116,6 +118,21 @@ Schemas are attached to each variant.
 
 ```ts
 Color.Rgb.schema["~standard"].validate([1, 2, 3]); // { value: [1, 2, 3] }
+```
+
+### `constructAsync`
+
+Same as `construct`, but allows asynchronous validation - each variant will return a `Promise` that resolves to an ADT value.
+
+```ts
+const Color = ADT.constructAsync("Color", {
+  Rgb: ADT.identity<[r: number, g: number, b: number]>(),
+  Hex: ADT.identity<[hex: string]>(),
+  Hsl: ADT.identity<[h: number, s: number, l: number]>(),
+});
+
+const red = await Color.Rgb(255, 0, 0);
+console.log(red.values); // [255, 0, 0]
 ```
 
 ### `matches`

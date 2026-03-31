@@ -21,13 +21,11 @@ export type UnknownVariantMap = Record<PropertyKey, UnknownArraySchema> &
 
 export type UnknownAdtValue = AdtValue<string, PropertyKey, UnknownArraySchema>;
 
-export interface AdtVariant<
+export interface AdtVariantBase<
   Name extends string,
   Variant extends PropertyKey,
   VariantSchema extends UnknownArraySchema,
 > {
-  /** parse and validate */
-  (...values: StandardSchemaV1.InferInput<VariantSchema>): AdtValue<Name, Variant, VariantSchema>;
   /** skip parsing */
   from(
     ...values: StandardSchemaV1.InferOutput<VariantSchema>
@@ -41,8 +39,32 @@ export interface AdtVariant<
   readonly [keys.type]: "variant";
 }
 
+export interface AdtVariant<
+  Name extends string,
+  Variant extends PropertyKey,
+  VariantSchema extends UnknownArraySchema,
+> extends AdtVariantBase<Name, Variant, VariantSchema> {
+  /** parse and validate */
+  (...values: StandardSchemaV1.InferInput<VariantSchema>): AdtValue<Name, Variant, VariantSchema>;
+}
+
+export interface AdtVariantAsync<
+  Name extends string,
+  Variant extends PropertyKey,
+  VariantSchema extends UnknownArraySchema,
+> extends AdtVariantBase<Name, Variant, VariantSchema> {
+  /** parse and validate */
+  (
+    ...values: StandardSchemaV1.InferInput<VariantSchema>
+  ): Promise<AdtValue<Name, Variant, VariantSchema>>;
+}
+
 export type AdtVariants<Name extends string, VariantMap extends UnknownVariantMap> = {
   [Variant in keyof VariantMap]: AdtVariant<Name, Variant, VariantMap[Variant]>;
+};
+
+export type AdtVariantsAsync<Name extends string, VariantMap extends UnknownVariantMap> = {
+  [Variant in keyof VariantMap]: AdtVariantAsync<Name, Variant, VariantMap[Variant]>;
 };
 
 export interface AdtStatic<Name extends string, VariantMap extends UnknownVariantMap> {
@@ -58,9 +80,15 @@ export type Adt<Name extends string, VariantMap extends UnknownVariantMap> = Adt
 > &
   AdtStatic<Name, VariantMap>;
 
-export type AdtVariantMap<E extends Adt<any, any>> = E[typeof keys.variants];
+export type AdtAsync<Name extends string, VariantMap extends UnknownVariantMap> = AdtVariantsAsync<
+  Name,
+  VariantMap
+> &
+  AdtStatic<Name, VariantMap>;
 
-export type AdtValueFor<E extends Adt<any, any>> = {
+export type AdtVariantMap<E extends Adt<any, any> | AdtAsync<any, any>> = E[typeof keys.variants];
+
+export type AdtValueFor<E extends Adt<any, any> | AdtAsync<any, any>> = {
   [Variant in keyof AdtVariantMap<E>]: AdtValue<
     E[typeof keys.name],
     Variant,

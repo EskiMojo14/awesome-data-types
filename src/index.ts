@@ -1,7 +1,9 @@
 export type {
   Adt,
+  AdtAsync,
   AdtValue,
   AdtVariant,
+  AdtVariantAsync,
   UnknownVariantMap,
   UnknownAdtValue,
   AdtVariantMap,
@@ -9,4 +11,4 @@ export type {
   ValueOf,
   InputFor,
 } from "./lib/types";
-export { construct, match, isAdtValue, matches, unwrap, parse } from "./lib";
+export { construct, constructAsync, match, isAdtValue, matches, unwrap, parse } from "./lib";
