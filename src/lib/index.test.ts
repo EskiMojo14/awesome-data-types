@@ -13,7 +13,7 @@ import type {
   UnknownArraySchema,
   UnknownAdtValue,
 } from "./types";
-import { objectEntries, objectKeys } from "./utils";
+import { unsafeEntries, unsafeKeys } from "./utils";
 import { construct, isAdtValue, match, matches, unwrap, parse } from ".";
 
 function rgbToHex([r, g, b]: [number, number, number]) {
@@ -52,8 +52,8 @@ const variantOutputs: StandardSchemaV1Dictionary.InferOutput<typeof identityColo
   Hsl: variantInputs.Hsl,
 };
 
-const cases = objectEntries(variantInputs);
-const variants = objectKeys(variantInputs);
+const cases = unsafeEntries(variantInputs);
+const variants = unsafeKeys(variantInputs);
 
 // wrapper to avoid typescript complaints
 function makeAdtValue<VariantMap extends UnknownVariantMap>(
@@ -100,7 +100,7 @@ describe.each([
       expect(() => Color.Hex(0, 0, 256)).toThrow(SchemaError);
     });
   }
-  it.each(objectEntries(variantOutputs))("should create a value from %s", (variant, args) => {
+  it.each(unsafeEntries(variantOutputs))("should create a value from %s", (variant, args) => {
     const value = Color[variant].from(...(args as unknown as Array<never>));
     expect(value).toEqual<UnknownAdtValue>({
       variant,
