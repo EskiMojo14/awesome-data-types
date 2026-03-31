@@ -64,6 +64,7 @@ export function construct<const Name extends string, const VariantMap extends Un
   const adtStatic: AdtStatic<Name, VariantMap> = {
     [keys.name]: name,
     [keys.type]: "ADT",
+    [keys.variants]: variants,
   };
 
   const target = adtStatic as Adt<Name, VariantMap>;

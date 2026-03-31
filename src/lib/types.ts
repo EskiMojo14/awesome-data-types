@@ -49,10 +49,7 @@ export interface AdtStatic<Name extends string, VariantMap extends UnknownVarian
   // dissuade
   readonly [keys.name]: Name;
   readonly [keys.type]: "ADT";
-  // type-only
-  readonly [keys.types]?: {
-    variantMap: VariantMap;
-  };
+  readonly [keys.variants]: VariantMap;
 }
 
 export type Adt<Name extends string, VariantMap extends UnknownVariantMap> = AdtVariants<
@@ -61,9 +58,7 @@ export type Adt<Name extends string, VariantMap extends UnknownVariantMap> = Adt
 > &
   AdtStatic<Name, VariantMap>;
 
-export type AdtVariantMap<E extends Adt<any, any>> = NonNullable<
-  E[typeof keys.types]
->["variantMap"];
+export type AdtVariantMap<E extends Adt<any, any>> = E[typeof keys.variants];
 
 export type AdtValueFor<E extends Adt<any, any>> = {
   [Variant in keyof AdtVariantMap<E>]: AdtValue<
