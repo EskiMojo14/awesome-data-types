@@ -146,22 +146,6 @@ const colorString = ADT.match(red, {
 });
 ```
 
-If matching multiple ADTs, the cases can be nested.
-
-```ts
-const result = ADT.match(value, {
-  Option: {
-    Some: (value) => value,
-    None: () => null,
-  },
-  Color: {
-    Rgb: (r, g, b) => `rgb(${r}, ${g}, ${b})`,
-    Hex: (hex) => hex,
-    Hsl: (h, s, l) => `hsl(${h}, ${s}%, ${l}%)`,
-  },
-});
-```
-
 ## Schema helpers
 
 ### `identity`

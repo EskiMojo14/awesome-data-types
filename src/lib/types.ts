@@ -1,6 +1,6 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type * as keys from "./keys";
-import type { AnyFn, UnionHasOneMember } from "./utils";
+import type { AnyFn } from "./utils";
 
 export interface AdtValue<
   Name extends string,
@@ -80,45 +80,22 @@ export type InputFor<T extends { schema: UnknownArraySchema }> = StandardSchemaV
   T["schema"]
 >;
 
-type VariantCases = Partial<Record<PropertyKey, AnyFn>>;
-type NameCases = Partial<Record<string, VariantCases>>;
+export type VariantCases = Partial<Record<PropertyKey, AnyFn>>;
 
 export type MatcherMap<Value extends UnknownAdtValue> = {
-  [N in Value[typeof keys.name]]?: {
-    [V in Extract<Value, { [keys.name]: N }> as V["variant"]]?: (...args: V["values"]) => unknown;
-  };
+  [Variant in Value as Variant["variant"]]?: (...args: Variant["values"]) => unknown;
 };
 
-export type MatchersFor<Value extends UnknownAdtValue> =
-  UnionHasOneMember<Value[typeof keys.name]> extends true
-    ? NonNullable<MatcherMap<Value>[Value[typeof keys.name]]>
-    : MatcherMap<Value>;
+export type MatchedValues<Matchers extends VariantCases> = {
+  variant: keyof Matchers;
+};
 
-export type MatchedValues<Matchers extends VariantCases | NameCases> = Matchers extends NameCases
-  ? {
-      [K in keyof Matchers]: {
-        [keys.name]: K;
-        variant: keyof Matchers[K];
-      };
-    }[keyof Matchers]
-  : {
-      variant: keyof Matchers;
-    };
-
-export type UnmatchedValues<
-  Value extends UnknownAdtValue,
-  Matchers extends VariantCases | NameCases,
-> = Exclude<Value, MatchedValues<Matchers>>;
+export type UnmatchedValues<Value extends UnknownAdtValue, Matchers extends VariantCases> = Exclude<
+  Value,
+  MatchedValues<Matchers>
+>;
 
 export type MatcherResults<
   Value extends UnknownAdtValue,
-  Matchers extends MatchersFor<Value>,
-> = Matchers extends NameCases
-  ? {
-      [N in Value[typeof keys.name]]: {
-        [V in Extract<Value, { [keys.name]: N }> as V["variant"]]: ReturnType<
-          NonNullable<NonNullable<Matchers[N]>[V["variant"]]>
-        >;
-      }[Extract<Value, { [keys.name]: N }>["variant"]];
-    }[Value[typeof keys.name]]
-  : ReturnType<NonNullable<(Matchers & VariantCases)[Value["variant"]]>>;
+  Matchers extends MatcherMap<Value>,
+> = ReturnType<NonNullable<(Matchers & VariantCases)[Value["variant"]]>>;

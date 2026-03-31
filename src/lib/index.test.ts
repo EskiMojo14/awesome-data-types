@@ -156,21 +156,6 @@ describe("match", () => {
       }),
     ).toBe("rgb(255, 0, 0)");
   });
-  it.each([
-    [red, red.values[0]],
-    [some, some.values[0]],
-  ])("should allow matching multiple ADTs", (value, expected) => {
-    expect(
-      match(value, {
-        Option: {
-          Some: (value) => value,
-        },
-        Color: {
-          Rgb: (r) => r,
-        },
-      }),
-    ).toBe(expected);
-  });
   it("should throw if missing case", () => {
     expect(() => match(red, {} as never)).toThrowError("missing case for Rgb");
     expect(() => match(some, { Color: {} } as never)).toThrowError("missing cases for Option");

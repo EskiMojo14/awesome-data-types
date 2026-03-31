@@ -10,11 +10,11 @@ import type {
   UnknownArraySchema,
   UnknownAdtValue,
   UnknownVariantMap,
-  MatchersFor,
   MatcherResults,
   UnmatchedValues,
+  MatcherMap,
+  VariantCases,
 } from "./types";
-import type { AnyFn } from "./utils";
 import { assert } from "./utils";
 
 /* #__NO_SIDE_EFFECTS__ */
@@ -98,29 +98,24 @@ export function matches(
     : nameMatches;
 }
 
-function isNestedMatcherMap(
-  cases: Record<string, Record<PropertyKey, AnyFn>> | Record<PropertyKey, AnyFn>,
-): cases is Record<string, Record<PropertyKey, AnyFn>> {
-  for (const key in cases) return typeof cases[key] === "object";
-  return false;
-}
-
-/* #__NO_SIDE_EFFECTS__ */
 export function match<
   Value extends UnknownAdtValue,
-  Matchers extends MatchersFor<Value>,
+  Matchers extends MatcherMap<Value>,
   Catchall = never,
 >(
-  { values, variant, [keys.name]: name }: Value,
+  { values, variant }: Value,
   cases: Matchers,
   catchall?: (...args: UnmatchedValues<Value, Matchers>["values"]) => Catchall,
-): MatcherResults<Value, Matchers> | Catchall {
-  const _cases = cases as Record<PropertyKey, AnyFn> | Record<string, Record<PropertyKey, AnyFn>>;
-  const matchers = isNestedMatcherMap(_cases) ? _cases[name] : _cases;
-  assert(matchers, `missing cases for ${name}`);
-  const matcher = matchers[variant] ?? catchall;
+): MatcherResults<Value, Matchers> | Catchall;
+/* #__NO_SIDE_EFFECTS__ */
+export function match(
+  { values, variant }: UnknownAdtValue,
+  cases: VariantCases,
+  catchall?: (...args: Array<unknown>) => unknown,
+): unknown {
+  const matcher = cases[variant] ?? catchall;
   assert(matcher, `missing case for ${String(variant)}`);
-  return matcher(...values);
+  return matcher(...values) as never;
 }
 
 /* #__NO_SIDE_EFFECTS__ */
