@@ -2,12 +2,17 @@ import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type * as keys from "./keys";
 import type { AnyFn } from "./utils";
 
+/**
+ * An ADT value.
+ */
 export interface AdtValue<
   Name extends string,
   Variant extends PropertyKey,
   VariantSchema extends UnknownArraySchema,
 > {
+  /** The variant's values */
   readonly values: StandardSchemaV1.InferOutput<VariantSchema>;
+  /** The variant's name */
   readonly variant: Variant;
   // dissuade
   readonly [keys.name]: Name;
@@ -21,16 +26,20 @@ export type UnknownVariantMap = Record<PropertyKey, UnknownArraySchema> &
 
 export type UnknownAdtValue = AdtValue<string, PropertyKey, UnknownArraySchema>;
 
+/**
+ * The base for an ADT variant.
+ */
 export interface AdtVariantBase<
   Name extends string,
   Variant extends PropertyKey,
   VariantSchema extends UnknownArraySchema,
 > {
-  /** skip parsing */
+  /** Construct an ADT value from already-parsed values */
   from(
     ...values: StandardSchemaV1.InferOutput<VariantSchema>
   ): AdtValue<Name, Variant, VariantSchema>;
 
+  /** The variant's schema */
   readonly schema: VariantSchema;
 
   // dissuade
@@ -39,21 +48,27 @@ export interface AdtVariantBase<
   readonly [keys.type]: "variant";
 }
 
+/**
+ * A synchronous ADT variant.
+ */
 export interface AdtVariant<
   Name extends string,
   Variant extends PropertyKey,
   VariantSchema extends UnknownArraySchema,
 > extends AdtVariantBase<Name, Variant, VariantSchema> {
-  /** parse and validate */
+  /** Construct an ADT value from input values, including validation */
   (...values: StandardSchemaV1.InferInput<VariantSchema>): AdtValue<Name, Variant, VariantSchema>;
 }
 
+/**
+ * An asynchronous ADT variant.
+ */
 export interface AdtVariantAsync<
   Name extends string,
   Variant extends PropertyKey,
   VariantSchema extends UnknownArraySchema,
 > extends AdtVariantBase<Name, Variant, VariantSchema> {
-  /** parse and validate */
+  /** Construct an ADT value from input values, including validation */
   (
     ...values: StandardSchemaV1.InferInput<VariantSchema>
   ): Promise<AdtValue<Name, Variant, VariantSchema>>;

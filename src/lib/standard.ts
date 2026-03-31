@@ -5,6 +5,13 @@ import type { LooseAutocomplete, Override } from "./utils";
 
 /**
  * Creates a schema that transforms the value.
+ *
+ * @param transform The transform function.
+ * @returns A schema that transforms the value.
+ *
+ * @example
+ * const schema = transform((x: number) => x + 1);
+ * schema["~standard"].validate(1); // { value: 2 }
  */
 export const transform = <T, U>(transform: (value: T) => U): StandardSchemaV1<T, U> => ({
   "~standard": {
@@ -16,11 +23,24 @@ export const transform = <T, U>(transform: (value: T) => U): StandardSchemaV1<T,
 
 /**
  * Creates a schema that returns the input value.
+ *
+ * @returns A schema that returns the input value.
+ *
+ * @example
+ * const schema = identity();
+ * schema["~standard"].validate(1); // { value: 1 }
  */
 export const identity = <T>(): StandardSchemaV1<T> => transform((x) => x);
 
 /**
  * Take a tuple schema and add labels to the arguments.
+ *
+ * @param schema The schema to label.
+ * @returns The labeled schema.
+ *
+ * @example
+ * const schema = labelArgs<[r: number, g: number, b: number]>()(v.tuple([v.number(), v.number(), v.number()]));
+ * schema["~standard"].validate([1, 2, 3]); // { value: [1, 2, 3] }
  */
 export function labelArgs<
   InputArgs extends ReadonlyArray<unknown>,
@@ -30,17 +50,41 @@ export function labelArgs<
 >(): <Schema extends StandardSchemaV1<InputArgs, OutputArgs>>(
   schema: Schema,
 ) => Override<Schema, StandardSchemaV1<InputArgs, OutputArgs>>;
+
+/**
+ * Take a tuple schema and add labels to the arguments.
+ *
+ * *Prefer the curried form if possible, as it preserves the base schema type.*
+ *
+ * @param schema The schema to label.
+ * @returns The labeled schema.
+ *
+ * @example
+ * const schema = labelArgs(v.tuple([v.number(), v.number(), v.number()]));
+ * schema["~standard"].validate([1, 2, 3]); // { value: [1, 2, 3] }
+ */
 export function labelArgs<
   InputArgs extends ReadonlyArray<unknown>,
   OutputArgs extends {
     [K in keyof InputArgs]: unknown;
   } = InputArgs,
 >(schema: StandardSchemaV1<InputArgs, OutputArgs>): StandardSchemaV1<InputArgs, OutputArgs>;
+
+/* #__NO_SIDE_EFFECTS__ */
 export function labelArgs(schema?: UnknownArraySchema) {
   if (schema) return schema;
   return (schema: UnknownArraySchema) => schema;
 }
 
+/**
+ * Parses a value with a schema synchronously.
+ *
+ * @param schema The schema to parse with.
+ * @param value The value to parse.
+ * @returns The parsed value.
+ * @throws If the validation is asynchronous or fails.
+ */
+/* #__NO_SIDE_EFFECTS__ */
 export function parseSync<Schema extends StandardSchemaV1>(
   schema: Schema,
   value: LooseAutocomplete<StandardSchemaV1.InferInput<Schema>>,
@@ -51,6 +95,15 @@ export function parseSync<Schema extends StandardSchemaV1>(
   return result.value;
 }
 
+/**
+ * Parses a value with a schema asynchronously.
+ *
+ * @param schema The schema to parse with.
+ * @param value The value to parse.
+ * @returns A promise that resolves to the parsed value.
+ * @throws If the validation fails.
+ */
+/* #__NO_SIDE_EFFECTS__ */
 export async function parse<Schema extends StandardSchemaV1>(
   schema: Schema,
   value: LooseAutocomplete<StandardSchemaV1.InferInput<Schema>>,

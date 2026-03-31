@@ -51,6 +51,23 @@ function makeAdtVariantBase<
   };
 }
 
+/**
+ * Creates an ADT from a map of variant schemas.
+ * Schema validation _must_ be synchronous. If you need asynchronous validation, use `constructAsync` instead.
+ *
+ * @param name The name of the ADT. Should be unique.
+ * @param variants A map of variant names to schemas.
+ * @returns An ADT.
+ *
+ * @example
+ * const Color = ADT.construct("Color", {
+ *   Rgb: v.tuple([v.number(), v.number(), v.number()]),
+ *   Hex: v.tuple([v.string()]),
+ *   Hsl: v.tuple([v.number(), v.number(), v.number()]),
+ * });
+ *
+ * const red = Color.Rgb(255, 0, 0);
+ */
 /* #__NO_SIDE_EFFECTS__ */
 export function construct<const Name extends string, const VariantMap extends UnknownVariantMap>(
   name: Name,
@@ -72,6 +89,22 @@ export function construct<const Name extends string, const VariantMap extends Un
   return target;
 }
 
+/**
+ * Creates an ADT from a map of variant schemas.
+ *
+ * @param name The name of the ADT. Should be unique.
+ * @param variants A map of variant names to schemas.
+ * @returns An ADT.
+ *
+ * @example
+ * const Color = ADT.constructAsync("Color", {
+ *   Rgb: z.tuple([z.number(), z.number(), z.number()]),
+ *   Hex: z.tuple([z.string()]),
+ *   Hsl: z.tuple([z.number(), z.number(), z.number()]),
+ * });
+ *
+ * const red = await Color.Rgb(255, 0, 0);
+ */
 /* #__NO_SIDE_EFFECTS__ */
 export function constructAsync<
   const Name extends string,
@@ -95,6 +128,13 @@ export function constructAsync<
   return target;
 }
 
+/**
+ * Checks if a value matches an ADT variant.
+ *
+ * @param variant The ADT variant to check.
+ * @param value The value to check.
+ * @returns Whether the value matches the ADT variant.
+ */
 export function matches<
   Name extends string,
   Variant extends PropertyKey,
@@ -104,6 +144,13 @@ export function matches<
   value: UnknownAdtValue,
 ): value is AdtValue<Name, Variant, VariantSchema>;
 
+/**
+ * Checks if a value matches an ADT.
+ *
+ * @param adt The ADT to check.
+ * @param value The value to check.
+ * @returns Whether the value matches the ADT.
+ */
 export function matches<Name extends string, VariantMap extends UnknownVariantMap>(
   adt: Adt<Name, VariantMap>,
   value: UnknownAdtValue,
@@ -120,6 +167,14 @@ export function matches(
     : nameMatches;
 }
 
+/**
+ * Unwraps an ADT value to its variant's values.
+ *
+ * @param variant The ADT variant to unwrap to.
+ * @param value The ADT value to unwrap.
+ * @returns The variant's values.
+ * @throws If the value does not match the variant.
+ */
 /* #__NO_SIDE_EFFECTS__ */
 export function unwrap<
   Name extends string,
@@ -133,6 +188,15 @@ export function unwrap<
   return value.values;
 }
 
+/**
+ * Matches an ADT value to a pattern, returning the result of the matching case.
+ *
+ * @param value The ADT value to match.
+ * @param cases The pattern to match to.
+ * @param catchall A catchall case.
+ * @returns The result of the matching case.
+ * @throws If the value does not match any case and no catchall is provided.
+ */
 export function match<
   Value extends UnknownAdtValue,
   Matchers extends MatcherMap<Value>,
@@ -154,6 +218,12 @@ export function match(
   return matcher(...values) as never;
 }
 
+/**
+ * Checks if a value is an ADT value.
+ *
+ * @param value The value to check.
+ * @returns Whether the value is an ADT value.
+ */
 /* #__NO_SIDE_EFFECTS__ */
 export function isAdtValue(value: unknown): value is UnknownAdtValue {
   return (
@@ -165,6 +235,14 @@ export function isAdtValue(value: unknown): value is UnknownAdtValue {
   );
 }
 
+/**
+ * Parses an unknown value to an ADT value.
+ *
+ * @param adt The ADT to parse to.
+ * @param value The value to parse.
+ * @returns The parsed ADT value.
+ * @throws If the value is not an ADT value or does not match the ADT.
+ */
 /* #__NO_SIDE_EFFECTS__ */
 export function parse<Name extends string, VariantMap extends UnknownVariantMap>(
   adt: Adt<Name, VariantMap>,
