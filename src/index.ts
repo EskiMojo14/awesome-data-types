@@ -9,5 +9,5 @@ export type {
   ValueOf,
   InputFor,
 } from "./lib/types";
-export { construct, match, isAdtValue, matches } from "./lib";
+export { construct, match, isAdtValue, matches, unwrap, parse } from "./lib";
 export { transform, identity, labelArgs } from "./lib/standard";
