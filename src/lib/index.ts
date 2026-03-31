@@ -95,7 +95,6 @@ export function constructAsync<
   return target;
 }
 
-/* #__NO_SIDE_EFFECTS__ */
 export function matches<
   Name extends string,
   Variant extends PropertyKey,
@@ -104,10 +103,13 @@ export function matches<
   variant: AdtVariant<Name, Variant, VariantSchema>,
   value: UnknownAdtValue,
 ): value is AdtValue<Name, Variant, VariantSchema>;
+
 export function matches<Name extends string, VariantMap extends UnknownVariantMap>(
   adt: Adt<Name, VariantMap>,
   value: UnknownAdtValue,
 ): value is AdtValueFor<Adt<Name, VariantMap>>;
+
+/* #__NO_SIDE_EFFECTS__ */
 export function matches(
   adtOrVariant: Adt<string, any> | AdtVariant<string, PropertyKey, UnknownArraySchema>,
   value: UnknownAdtValue,
@@ -140,6 +142,7 @@ export function match<
   cases: Matchers,
   catchall?: (...args: UnmatchedValues<Value, Matchers>["values"]) => Catchall,
 ): MatcherResults<Value, Matchers> | Catchall;
+
 /* #__NO_SIDE_EFFECTS__ */
 export function match(
   { values, variant }: UnknownAdtValue,
