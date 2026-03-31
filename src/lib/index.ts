@@ -142,3 +142,13 @@ export function isAdtValue(value: unknown): value is UnknownAdtValue {
     value[keys.type] === "value"
   );
 }
+
+/* #__NO_SIDE_EFFECTS__ */
+export function parse<Name extends string, VariantMap extends UnknownVariantMap>(
+  adt: Adt<Name, VariantMap>,
+  value: unknown,
+): AdtValueFor<Adt<Name, VariantMap>> {
+  assert(isAdtValue(value), "value is not an ADT value");
+  assert(matches(adt, value), "value does not match ADT");
+  return value;
+}

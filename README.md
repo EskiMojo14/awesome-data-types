@@ -160,6 +160,27 @@ const colorString = ADT.match(
 );
 ```
 
+### `unwrap`
+
+Unwraps an ADT value to its variant's values. Throws an error if the value does not match the variant.
+
+```ts
+const [r, g, b] = ADT.unwrap(Color.Rgb, red);
+```
+
+### `parse`
+
+Parses an unknown value to an ADT value. Throws an error if the value is not an ADT value or does not match the ADT.
+
+Note that this does _not_ use any schema validation, as the schema is for validating the variant's _input_, not the output.
+
+```ts
+const red = Color.Rgb(255, 0, 0);
+const serialized = JSON.stringify(red);
+const parsed: unknown = JSON.parse(serialized);
+const parsed = ADT.parse(Color, parsed);
+```
+
 ## Schema helpers
 
 ### `identity`

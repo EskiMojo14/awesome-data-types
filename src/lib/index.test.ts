@@ -14,7 +14,7 @@ import type {
   UnknownAdtValue,
 } from "./types";
 import { objectEntries, objectKeys } from "./utils";
-import { construct, isAdtValue, match, matches, unwrap } from "./index";
+import { construct, isAdtValue, match, matches, unwrap, parse } from ".";
 
 function rgbToHex([r, g, b]: [number, number, number]) {
   return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
@@ -97,7 +97,7 @@ describe.each([
   if (hasValidation === "with") {
     it("should throw if invalid", () => {
       // @ts-expect-error testing invalid input
-      expect(() => Color.Hex(0, 0, 256)).toThrowError(SchemaError);
+      expect(() => Color.Hex(0, 0, 256)).toThrow(SchemaError);
     });
   }
   it.each(objectEntries(variantOutputs))("should create a value from %s", (variant, args) => {
@@ -168,5 +168,25 @@ describe("unwrap", () => {
   it("should throw if wrong variant", () => {
     const red = Color.Rgb(255, 0, 0);
     expect(() => unwrap(Color.Hex, red)).toThrow("value does not match variant");
+  });
+});
+
+describe("parse", () => {
+  const Color = construct("Color", colorVariantSchemas);
+  it("should parse", () => {
+    const red = Color.Rgb(255, 0, 0);
+    const parsed = parse(Color, red);
+    expect(parsed).toBe(red);
+  });
+  it("should throw if not an ADT value", () => {
+    expect(() => parse(Color, {})).toThrow("value is not an ADT value");
+  });
+  it("should throw if wrong ADT", () => {
+    const Option = construct("Option", {
+      Some: identity<[v: unknown]>(),
+      None: identity<[]>(),
+    });
+    const some = Option.Some(1);
+    expect(() => parse(Color, some)).toThrow("value does not match ADT");
   });
 });
