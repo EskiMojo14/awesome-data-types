@@ -9,11 +9,10 @@ ADT values are JSON serializable, as long as the data inside is.
 ```ts
 import * as v from "valibot";
 import { rgbToHex } from "./utils";
-import type { AdtValueFor, UnknownAdtValue } from "awesome-data-types";
-import { construct, matches, identity, transform, match } from "awesome-data-types";
+import * as ADT from "awesome-data-types";
 
 // for runtime validation
-const Color = construct("Color", {
+const Color = ADT.construct("Color", {
   Rgb: v.tuple([v.number(), v.number(), v.number()]),
   Hex: v.tuple([v.string()]),
   Hsl: v.tuple([v.number(), v.number(), v.number()]),
@@ -26,15 +25,17 @@ const Color = construct("Color", {
 });
 
 // or for compile time only validation
-const Color = construct("Color", {
-  Rgb: identity<[r: number, g: number, b: number]>(),
-  Hex: identity<[hex: string]>(),
-  Hsl: identity<[h: number, s: number, l: number]>(),
+const Color = ADT.construct("Color", {
+  Rgb: ADT.identity<[r: number, g: number, b: number]>(),
+  Hex: ADT.identity<[hex: string]>(),
+  Hsl: ADT.identity<[h: number, s: number, l: number]>(),
   // supports transforming inputs
-  HexFromRgb: transform((rgb: [r: number, g: number, b: number]): [hex: string] => [rgbToHex(rgb)]),
+  HexFromRgb: ADT.transform((rgb: [r: number, g: number, b: number]): [hex: string] => [
+    rgbToHex(rgb),
+  ]),
 });
 
-type Color = AdtValueFor<typeof Color>;
+type Color = ADT.AdtValueFor<typeof Color>;
 
 const red = Color.Rgb(255, 0, 0);
 const green = Color.Hex("#00ff00");
@@ -44,13 +45,13 @@ const purple = Color.HexFromRgb(128, 0, 128);
 // construct without validation or transformation
 const purple2 = Color.HexFromRgb.from("#800080");
 
-function handleUnknownValue(value: UnknownAdtValue) {
+function handleUnknownValue(value: ADT.UnknownAdtValue) {
   // type guard
-  if (matches(Color, value)) {
+  if (ADT.matches(Color, value)) {
     // value is a Color
     value.values; // narrowed to [r: number, g: number, b: number] | [hex: string] | [h: number, s: number, l: number]
   }
-  if (matches(Color.Rgb, value)) {
+  if (ADT.matches(Color.Rgb, value)) {
     // color is a Color.Rgb
     value.values; // narrowed to [r: number, g: number, b: number]
   }
@@ -63,7 +64,7 @@ function handleColor(color: Color) {
     color.values; // narrowed to [r: number, g: number, b: number]
   }
   // pattern matching
-  const colorString = match(color, {
+  const colorString = ADT.match(color, {
     Rgb: (r, g, b) => `rgb(${r}, ${g}, ${b})`,
     Hex: (hex) => hex,
     Hsl: (h, s, l) => `hsl(${h}, ${s}%, ${l}%)`,
@@ -76,16 +77,16 @@ function handleColor(color: Color) {
 
 ### `construct`
 
-Creates an ADT from a map of variant schemas. Note that each variant must be an array schema. First parameter is the name of the ADT, which should be unique.
+Creates an ADT from a map of variant schemas. Note that each variant must be an array schema (to match the array of arguments). First parameter is the name of the ADT, which should be unique.
 
 ```ts
-const Color = construct("Color", {
-  Rgb: identity<[r: number, g: number, b: number]>(),
-  Hex: identity<[hex: string]>(),
-  Hsl: identity<[h: number, s: number, l: number]>(),
+const Color = ADT.construct("Color", {
+  Rgb: ADT.identity<[r: number, g: number, b: number]>(),
+  Hex: ADT.identity<[hex: string]>(),
+  Hsl: ADT.identity<[h: number, s: number, l: number]>(),
 });
 // construct a discriminated union of values
-type Color = AdtValueFor<typeof Color>;
+type Color = ADT.AdtValueFor<typeof Color>;
 ```
 
 Each variant is a function that takes the variant's arguments and returns an ADT value, storing the parsed arguments.
@@ -121,11 +122,11 @@ Color.Rgb.schema["~standard"].validate([1, 2, 3]); // { value: [1, 2, 3] }
 Checks if a value is an ADT value.
 
 ```ts
-if (matches(Color, red)) {
+if (ADT.matches(Color, red)) {
   // red is a Color
   color.values; // [255, 0, 0]
 }
-if (matches(Color.Rgb, red)) {
+if (ADT.matches(Color.Rgb, red)) {
   // red is a Color.Rgb
   color.values; // [255, 0, 0]
 }
@@ -138,7 +139,7 @@ Matches an ADT value to a pattern, returning the result of the matching case.
 Throws an error if the value does not match any case.
 
 ```ts
-const colorString = match(red, {
+const colorString = ADT.match(red, {
   Rgb: (r, g, b) => `rgb(${r}, ${g}, ${b})`,
   Hex: (hex) => hex,
   Hsl: (h, s, l) => `hsl(${h}, ${s}%, ${l}%)`,
@@ -148,7 +149,7 @@ const colorString = match(red, {
 If matching multiple ADTs, the cases can be nested.
 
 ```ts
-const result = match(value, {
+const result = ADT.match(value, {
   Option: {
     Some: (value) => value,
     None: () => null,
@@ -168,7 +169,7 @@ const result = match(value, {
 Creates a schema that returns the input value, with no validation.
 
 ```ts
-const schema = identity<[r: number, g: number, b: number]>();
+const schema = ADT.identity<[r: number, g: number, b: number]>();
 schema["~standard"].validate([1, 2, 3]); // { value: [1, 2, 3] }
 ```
 
@@ -177,7 +178,7 @@ schema["~standard"].validate([1, 2, 3]); // { value: [1, 2, 3] }
 Creates a schema that transforms the value, with no validation.
 
 ```ts
-const schema = transform((x: number) => x + 1);
+const schema = ADT.transform((x: number) => x + 1);
 schema["~standard"].validate(1); // { value: 2 }
 ```
 
@@ -186,14 +187,14 @@ schema["~standard"].validate(1); // { value: 2 }
 Take a tuple schema and add labels to the items. Useful when using a schema library, since by default tuple items will just be labeled `arg_n`.
 
 ```ts
-const Color = construct("Color", {
+const Color = ADT.construct("Color", {
   RgbWithoutLabel: rgbSchema,
-  RgbWithLabel: labelArgs<[r: number, g: number, b: number]>()(rgbSchema),
+  RgbWithLabel: ADT.labelArgs<[r: number, g: number, b: number]>()(rgbSchema),
 });
-type Color = AdtValueFor<typeof Color>;
+type Color = ADT.AdtValueFor<typeof Color>;
 
 function handleColor(color: Color) {
-  match(color, {
+  ADT.match(color, {
     RgbWithoutLabel(r, g, b) {
       // r, g, b are numbers
     },
@@ -212,9 +213,9 @@ Note that the type will be widened to a standard schema with a single call - if 
 ```ts
 const baseSchema = v.tuple([v.number(), v.number(), v.number()]);
 
-const schema = labelArgs<[r: number, g: number, b: number]>(baseSchema);
+const schema = ADT.labelArgs<[r: number, g: number, b: number]>(baseSchema);
 schema.items; // error - we've lost the base schema type
 
-const schema2 = labelArgs<[r: number, g: number, b: number]>()(baseSchema);
+const schema2 = ADT.labelArgs<[r: number, g: number, b: number]>()(baseSchema);
 schema2.items; // ok - we've preserved the base schema type
 ```
