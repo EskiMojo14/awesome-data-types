@@ -22,11 +22,7 @@ function makeAdtVariant<
   Name extends string,
   Variant extends string,
   VariantSchema extends UnknownArraySchema,
->(
-  adtStatic: AdtStatic<Name, UnknownVariantMap>,
-  variant: Variant,
-  schema: VariantSchema,
-): AdtVariant<Name, Variant, VariantSchema> {
+>(name: Name, variant: Variant, schema: VariantSchema): AdtVariant<Name, Variant, VariantSchema> {
   function from(
     input: StandardSchemaV1.InferOutput<VariantSchema>,
   ): AdtValue<Name, Variant, VariantSchema> {
@@ -34,7 +30,7 @@ function makeAdtVariant<
       values: input,
       variant,
       // dissuade
-      [keys.name]: adtStatic[keys.name],
+      [keys.name]: name,
       [keys.type]: "value",
     };
   }
@@ -49,7 +45,7 @@ function makeAdtVariant<
       from: (...args: StandardSchemaV1.InferOutput<VariantSchema>) => from(args),
       schema,
       // dissuade
-      [keys.name]: adtStatic[keys.name],
+      [keys.name]: name,
       [keys.variant]: variant,
       [keys.type]: "variant" as const,
     },
@@ -61,16 +57,14 @@ export function construct<const Name extends string, const VariantMap extends Un
   name: Name,
   variants: VariantMap,
 ): Adt<Name, VariantMap> {
-  const adtStatic: AdtStatic<Name, VariantMap> = {
+  const target = {
     [keys.name]: name,
     [keys.type]: "ADT",
     [keys.variants]: variants,
-  };
-
-  const target = adtStatic as Adt<Name, VariantMap>;
+  } satisfies AdtStatic<Name, VariantMap> as Adt<Name, VariantMap>;
 
   for (const variant in variants) {
-    target[variant] = makeAdtVariant(adtStatic, variant, variants[variant] as never) as never;
+    target[variant] = makeAdtVariant(name, variant, variants[variant] as never) as never;
   }
 
   return target;
