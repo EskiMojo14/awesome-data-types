@@ -17,6 +17,7 @@ import type {
 import type { AnyFn } from "./utils";
 import { assert } from "./utils";
 
+/* #__NO_SIDE_EFFECTS__ */
 function makeAdtVariant<
   Name extends string,
   Variant extends string,
@@ -56,6 +57,7 @@ function makeAdtVariant<
   );
 }
 
+/* #__NO_SIDE_EFFECTS__ */
 export function construct<
   const Name extends string,
   const VariantMap extends UnknownVariantMap,
@@ -78,6 +80,7 @@ export function construct<
   return target;
 }
 
+/* #__NO_SIDE_EFFECTS__ */
 export function matches<
   Name extends string,
   Variant extends PropertyKey,
@@ -114,6 +117,7 @@ function isNestedMatcherMap(
   return false;
 }
 
+/* #__NO_SIDE_EFFECTS__ */
 export function match<
   Value extends UnknownAdtValue,
   Matchers extends MatchersFor<Value>,
@@ -130,10 +134,10 @@ export function match<
   assert(matchers, `missing cases for ${name}`);
   const matcher = matchers[variant] ?? catchall;
   assert(matcher, `missing case for ${String(variant)}`);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return matcher(...values);
 }
 
+/* #__NO_SIDE_EFFECTS__ */
 export function isAdtValue(value: unknown): value is UnknownAdtValue {
   return (
     typeof value === "object" &&

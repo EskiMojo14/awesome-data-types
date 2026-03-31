@@ -1,7 +1,7 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { SchemaError } from "@standard-schema/utils";
 import * as v from "valibot";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import * as keys from "./keys";
 import type { StandardSchemaV1Dictionary } from "./standard";
 import { identity, transform } from "./standard";
@@ -83,9 +83,7 @@ describe.each([
         expect.objectContaining<
           Omit<AdtVariant<string, string, UnknownArraySchema>, never>
         >({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           from: expect.typeOf("function"),
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           schema: expect.exactly(variantSchemas[variant]),
           // dissuade
           [keys.variant]: variant,

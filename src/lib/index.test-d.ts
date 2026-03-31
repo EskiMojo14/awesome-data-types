@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import { describe, expectTypeOf, it } from "vitest";
+import { describe, expectTypeOf, it } from "vite-plus/test";
 import { identity, transform } from "./standard";
 import type { AdtValueFor, UnknownAdtValue, ValueOf, InputFor } from "./types";
 import { construct, matches, match } from "./index";

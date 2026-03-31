@@ -62,7 +62,6 @@ export type StandardSchemaV1Dictionary<
 > = {
   [K in keyof Input]: StandardSchemaV1<Input[K], Output[K]>;
 };
-// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace StandardSchemaV1Dictionary {
   export type InferInput<T extends StandardSchemaV1Dictionary> = {
     [K in keyof T]: StandardSchemaV1.InferInput<T[K]>;

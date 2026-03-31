@@ -1,6 +1,6 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import * as v from "valibot";
-import { describe, expectTypeOf, it } from "vitest";
+import { describe, expectTypeOf, it } from "vite-plus/test";
 import { identity, labelArgs, parseSync, transform } from "./standard";
 import type { Override } from "./utils";
 
