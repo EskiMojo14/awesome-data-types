@@ -17,7 +17,7 @@
   },
   "scripts": {
     "prepare": "vp config",
-    "prebuild": "pnpm run type",
+    "prebuild": "vp check",
     "build": "vp pack",
     "test": "vp test",
     "lint": "vp lint",
@@ -25,7 +25,6 @@
     "pre-commit": "vp staged",
     "attw": "attw",
     "publint": "publint",
-    "type": "tsc",
     "prepack": "pnpm run publint",
     "knip": "knip"
   },
@@ -36,6 +35,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
     "@types/node": "^25.5.0",
+    "@typescript/native-preview": "7.0.0-dev.20260331.1",
     "knip": "^6.1.1",
     "mix-n-matchers": "^2.0.1",
     "publint": "^0.3.18",
