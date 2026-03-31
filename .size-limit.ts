@@ -1,17 +1,28 @@
-import type { SizeLimitConfig } from "size-limit";
-import * as exports from "./dist/index.mjs";
+import type { Check, SizeLimitConfig } from "size-limit";
 
-const path = "./dist/index.mjs";
+const entryPoints = {
+  ADT: "./dist/index.mjs",
+  ADTS: "./dist/schema.mjs",
+};
 
-export default [
-  {
-    path,
-    import: "*",
-    name: "*",
-  },
-  ...Object.keys(exports).map((key) => ({
-    path,
-    import: `{ ${key} }`,
-    name: `ADT.${key}`,
-  })),
-] satisfies SizeLimitConfig;
+const config = await Promise.all(
+  Object.entries(entryPoints).map(async ([name, path]): Promise<Array<Check>> => {
+    const imports = await import(path);
+    return [
+      {
+        path,
+        import: "*",
+        name,
+      },
+      ...Object.keys(imports).map(
+        (key): Check => ({
+          path,
+          import: `{ ${key} }`,
+          name: `${name}.${key}`,
+        }),
+      ),
+    ];
+  }),
+);
+
+export default config.flat() satisfies SizeLimitConfig;

@@ -10,6 +10,7 @@ ADT values are JSON serializable, as long as the data inside is.
 import * as v from "valibot";
 import { rgbToHex } from "./utils";
 import * as ADT from "awesome-data-types";
+import * as ADTS from "awesome-data-types/schema";
 
 // for runtime validation
 const Color = ADT.construct("Color", {
@@ -26,11 +27,11 @@ const Color = ADT.construct("Color", {
 
 // or for compile time only validation
 const Color = ADT.construct("Color", {
-  Rgb: ADT.identity<[r: number, g: number, b: number]>(),
-  Hex: ADT.identity<[hex: string]>(),
-  Hsl: ADT.identity<[h: number, s: number, l: number]>(),
+  Rgb: ADTS.identity<[r: number, g: number, b: number]>(),
+  Hex: ADTS.identity<[hex: string]>(),
+  Hsl: ADTS.identity<[h: number, s: number, l: number]>(),
   // supports transforming inputs
-  HexFromRgb: ADT.transform((rgb: [r: number, g: number, b: number]): [hex: string] => [
+  HexFromRgb: ADTS.transform((rgb: [r: number, g: number, b: number]): [hex: string] => [
     rgbToHex(rgb),
   ]),
 });
@@ -183,21 +184,27 @@ const parsed = ADT.parse(Color, parsed);
 
 ## Schema helpers
 
+The library includes some helpers for working with standard schemas. Import them from `awesome-data-types/schema`.
+
 ### `identity`
 
-Creates a schema that returns the input value, with no validation.
+Creates a schema that returns the input value, with no runtime validation.
+
+Useful if you want to create an ADT with compile time validation but no runtime validation.
 
 ```ts
-const schema = ADT.identity<[r: number, g: number, b: number]>();
+const schema = ADTS.identity<[r: number, g: number, b: number]>();
 schema["~standard"].validate([1, 2, 3]); // { value: [1, 2, 3] }
 ```
 
 ### `transform`
 
-Creates a schema that transforms the value, with no validation.
+Creates a schema that transforms the value, with no runtime validation.
+
+Useful if you want to create an ADT with compile time validation but only runtime transformation.
 
 ```ts
-const schema = ADT.transform((x: number) => x + 1);
+const schema = ADTS.transform((x: number) => x + 1);
 schema["~standard"].validate(1); // { value: 2 }
 ```
 
@@ -208,7 +215,7 @@ Take a tuple schema and add labels to the items. Useful when using a schema libr
 ```ts
 const Color = ADT.construct("Color", {
   RgbWithoutLabel: rgbSchema,
-  RgbWithLabel: ADT.labelArgs<[r: number, g: number, b: number]>()(rgbSchema),
+  RgbWithLabel: ADTS.labelArgs<[r: number, g: number, b: number]>()(rgbSchema),
 });
 type Color = ADT.AdtValueFor<typeof Color>;
 
@@ -232,9 +239,9 @@ Note that the type will be widened to a standard schema with a single call - if 
 ```ts
 const baseSchema = v.tuple([v.number(), v.number(), v.number()]);
 
-const schema = ADT.labelArgs<[r: number, g: number, b: number]>(baseSchema);
+const schema = ADTS.labelArgs<[r: number, g: number, b: number]>(baseSchema);
 schema.items; // error - we've lost the base schema type
 
-const schema2 = ADT.labelArgs<[r: number, g: number, b: number]>()(baseSchema);
+const schema2 = ADTS.labelArgs<[r: number, g: number, b: number]>()(baseSchema);
 schema2.items; // ok - we've preserved the base schema type
 ```

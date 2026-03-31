@@ -9,7 +9,8 @@
   "types": "./dist/index.d.mts",
   "exports": {
     "./package.json": "./package.json",
-    ".": "./dist/index.mjs"
+    ".": "./dist/index.mjs",
+    "./schema": "./dist/schema.mjs"
   },
   "scripts": {
     "prepare": "vp config",

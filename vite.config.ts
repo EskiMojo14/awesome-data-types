@@ -16,7 +16,7 @@ const config: UserConfig = defineConfig({
     "*.{ts,md}": "vp fmt",
   },
   pack: {
-    entry: ["src/index.ts"],
+    entry: ["src/index.ts", "src/schema.ts"],
     sourcemap: true,
     format: ["esm"],
     dts: true,
