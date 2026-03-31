@@ -94,6 +94,27 @@ describe("match", () => {
     );
     expectTypeOf(result).toEqualTypeOf<"rgb" | "hex" | "hsl" | "hex from rgb" | "catchall">();
   });
+  it("allows async handlers", async () => {
+    const result = await match(
+      colorValue,
+      {
+        Rgb() {
+          return Promise.resolve("rgb" as const);
+        },
+        Hex() {
+          return Promise.resolve("hex" as const);
+        },
+        Hsl() {
+          return Promise.resolve("hsl" as const);
+        },
+        HexFromRgb() {
+          return Promise.resolve("hex from rgb" as const);
+        },
+      },
+      () => Promise.resolve("catchall" as const),
+    );
+    expectTypeOf(result).toEqualTypeOf<"rgb" | "hex" | "hsl" | "hex from rgb" | "catchall">();
+  });
 });
 
 describe("unwrap", () => {
