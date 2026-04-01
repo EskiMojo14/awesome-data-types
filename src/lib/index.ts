@@ -96,9 +96,9 @@ export function construct<const Name extends string, const VariantMap extends Un
  *
  * @example
  * const Color = ADT.constructAsync("Color", {
- *   Rgb: z.tuple([z.number(), z.number(), z.number()]),
- *   Hex: z.tuple([z.string()]),
- *   Hsl: z.tuple([z.number(), z.number(), z.number()]),
+ *   Rgb: v.tuple([v.number(), v.number(), v.number()]),
+ *   Hex: v.tuple([v.string()]),
+ *   Hsl: v.tuple([v.number(), v.number(), v.number()]),
  * });
  *
  * const red = await Color.Rgb(255, 0, 0);
