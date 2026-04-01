@@ -29,20 +29,18 @@ function makeAdtVariantBase<
   variant: Variant,
   schema: VariantSchema,
 ): AdtVariantBase<Name, Variant, VariantSchema> {
-  function from(
-    input: StandardSchemaV1.InferOutput<VariantSchema>,
-  ): AdtValue<Name, Variant, VariantSchema> {
-    return {
-      values: input,
-      variant,
-      // dissuade
-      [keys.name]: name,
-      [keys.type]: "value",
-    };
-  }
-
   return {
-    from: (...args: StandardSchemaV1.InferOutput<VariantSchema>) => from(args),
+    from(
+      input: StandardSchemaV1.InferOutput<VariantSchema>,
+    ): AdtValue<Name, Variant, VariantSchema> {
+      return {
+        values: input,
+        variant,
+        // dissuade
+        [keys.name]: name,
+        [keys.type]: "value",
+      };
+    },
     schema,
     // dissuade
     [keys.name]: name,
