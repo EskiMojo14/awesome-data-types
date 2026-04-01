@@ -4,7 +4,6 @@ export type LooseAutocomplete<T> = T | NonReducibleUnknown;
 export type Override<T, U> = Omit<T, keyof U> & U;
 export type AnyFn = (...args: any) => any;
 
-/* #__NO_SIDE_EFFECTS__ */
 export function assert(condition: unknown, message?: string): asserts condition {
   if (!condition) throw new Error(message);
 }
