@@ -1,5 +1,4 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import type * as keys from "./keys";
 import type { AnyFn } from "./utils";
 
 /**
@@ -15,8 +14,8 @@ export interface AdtValue<
   /** The variant's name */
   readonly variant: Variant;
   // dissuade
-  readonly [keys.name]: Name;
-  readonly [keys.type]: "value";
+  readonly "~name": Name;
+  readonly "~type": "value";
 }
 
 export type UnknownArraySchema = StandardSchemaV1<ReadonlyArray<unknown>>;
@@ -43,9 +42,9 @@ export interface AdtVariantBase<
   readonly schema: VariantSchema;
 
   // dissuade
-  readonly [keys.variant]: Variant;
-  readonly [keys.name]: Name;
-  readonly [keys.type]: "variant";
+  readonly "~variant": Variant;
+  readonly "~name": Name;
+  readonly "~type": "variant";
 }
 
 /**
@@ -84,9 +83,9 @@ export type AdtVariantsAsync<Name extends string, VariantMap extends UnknownVari
 
 export interface AdtStatic<Name extends string, VariantMap extends UnknownVariantMap> {
   // dissuade
-  readonly [keys.name]: Name;
-  readonly [keys.type]: "ADT";
-  readonly [keys.variants]: VariantMap;
+  readonly "~name": Name;
+  readonly "~type": "ADT";
+  readonly "~variants": VariantMap;
 }
 
 export type Adt<Name extends string, VariantMap extends UnknownVariantMap> = AdtVariants<
@@ -101,14 +100,10 @@ export type AdtAsync<Name extends string, VariantMap extends UnknownVariantMap> 
 > &
   AdtStatic<Name, VariantMap>;
 
-export type AdtVariantMap<E extends Adt<any, any> | AdtAsync<any, any>> = E[typeof keys.variants];
+export type AdtVariantMap<E extends Adt<any, any> | AdtAsync<any, any>> = E["~variants"];
 
 export type AdtValueFor<E extends Adt<any, any> | AdtAsync<any, any>> = {
-  [Variant in keyof AdtVariantMap<E>]: AdtValue<
-    E[typeof keys.name],
-    Variant,
-    AdtVariantMap<E>[Variant]
-  >;
+  [Variant in keyof AdtVariantMap<E>]: AdtValue<E["~name"], Variant, AdtVariantMap<E>[Variant]>;
 }[keyof AdtVariantMap<E>];
 
 export type ValueOf<T extends { schema: UnknownArraySchema }> = StandardSchemaV1.InferOutput<

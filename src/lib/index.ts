@@ -1,5 +1,4 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import * as keys from "./keys";
 import * as standard from "./standard";
 import type {
   Adt,
@@ -37,15 +36,15 @@ function makeAdtVariantBase<
         values: input,
         variant,
         // dissuade
-        [keys.name]: name,
-        [keys.type]: "value",
+        "~name": name,
+        "~type": "value",
       };
     },
     schema,
     // dissuade
-    [keys.name]: name,
-    [keys.variant]: variant,
-    [keys.type]: "variant" as const,
+    "~name": name,
+    "~variant": variant,
+    "~type": "variant" as const,
   };
 }
 
@@ -72,9 +71,9 @@ export function construct<const Name extends string, const VariantMap extends Un
   variants: VariantMap,
 ): Adt<Name, VariantMap> {
   const target = {
-    [keys.name]: name,
-    [keys.type]: "ADT",
-    [keys.variants]: variants,
+    "~name": name,
+    "~type": "ADT",
+    "~variants": variants,
   } satisfies AdtStatic<Name, VariantMap> as Adt<Name, VariantMap>;
 
   for (const variant in variants) {
@@ -109,9 +108,9 @@ export function constructAsync<
   const VariantMap extends UnknownVariantMap,
 >(name: Name, variants: VariantMap): AdtAsync<Name, VariantMap> {
   const target = {
-    [keys.name]: name,
-    [keys.type]: "ADT",
-    [keys.variants]: variants,
+    "~name": name,
+    "~type": "ADT",
+    "~variants": variants,
   } satisfies AdtStatic<Name, VariantMap> as AdtAsync<Name, VariantMap>;
 
   for (const variant in variants) {
@@ -159,9 +158,9 @@ export function matches(
   adtOrVariant: Adt<string, any> | AdtVariant<string, PropertyKey, UnknownArraySchema>,
   value: UnknownAdtValue,
 ) {
-  const nameMatches = adtOrVariant[keys.name] === value[keys.name];
-  return adtOrVariant[keys.type] === "variant"
-    ? nameMatches && adtOrVariant[keys.variant] === value.variant
+  const nameMatches = adtOrVariant["~name"] === value["~name"];
+  return adtOrVariant["~type"] === "variant"
+    ? nameMatches && adtOrVariant["~variant"] === value.variant
     : nameMatches;
 }
 
@@ -227,9 +226,9 @@ export function isAdtValue(value: unknown): value is UnknownAdtValue {
   return (
     typeof value === "object" &&
     value !== null &&
-    keys.name in value &&
-    keys.type in value &&
-    value[keys.type] === "value"
+    "~name" in value &&
+    "~type" in value &&
+    value["~type"] === "value"
   );
 }
 

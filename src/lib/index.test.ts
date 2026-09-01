@@ -2,7 +2,6 @@ import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { SchemaError } from "@standard-schema/utils";
 import * as v from "valibot";
 import { describe, expect, it } from "vite-plus/test";
-import * as keys from "./keys";
 import type { StandardSchemaV1Dictionary } from "./standard";
 import { identity, transform } from "./standard";
 import type {
@@ -70,7 +69,7 @@ describe.each([
 ] as const)("construct %s validation", (hasValidation, variantSchemas) => {
   const Color = construct("Color", variantSchemas);
   it("should create an Adt", () => {
-    expect(Color[keys.name]).toBe("Color");
+    expect(Color["~name"]).toBe("Color");
     for (const variant of variants) {
       expect(Color[variant]).toBeTypeOf("function");
       expect(Color[variant]).toEqual(
@@ -78,9 +77,9 @@ describe.each([
           from: expect.typeOf("function"),
           schema: expect.exactly(variantSchemas[variant]),
           // dissuade
-          [keys.variant]: variant,
-          [keys.name]: Color[keys.name],
-          [keys.type]: "variant",
+          "~variant": variant,
+          "~name": Color["~name"],
+          "~type": "variant",
         }),
       );
     }
@@ -90,8 +89,8 @@ describe.each([
     expect(value).toEqual<UnknownAdtValue>({
       variant,
       values: variantOutputs[variant],
-      [keys.name]: Color[keys.name],
-      [keys.type]: "value",
+      "~name": Color["~name"],
+      "~type": "value",
     });
   });
   if (hasValidation === "with") {
@@ -105,8 +104,8 @@ describe.each([
     expect(value).toEqual<UnknownAdtValue>({
       variant,
       values: args,
-      [keys.name]: Color[keys.name],
-      [keys.type]: "value",
+      "~name": Color["~name"],
+      "~type": "value",
     });
   });
 });
