@@ -14,13 +14,11 @@ const config = await Promise.all(
         import: "*",
         name,
       },
-      ...Object.keys(imports).map(
-        (key): Check => ({
-          path,
-          import: `{ ${key} }`,
-          name: `${name}.${key}`,
-        }),
-      ),
+      ...Object.keys(imports).map((key): Check => ({
+        path,
+        import: `{ ${key} }`,
+        name: `${name}.${key}`,
+      })),
     ];
   }),
 );
