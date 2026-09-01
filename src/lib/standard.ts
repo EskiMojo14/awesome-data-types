@@ -44,9 +44,7 @@ export const identity = <T>(): StandardSchemaV1<T> => transform((x) => x);
  */
 export function labelArgs<
   InputArgs extends ReadonlyArray<unknown>,
-  OutputArgs extends {
-    [K in keyof InputArgs]: unknown;
-  } = InputArgs,
+  OutputArgs extends ReadonlyArray<unknown> = InputArgs,
 >(): <Schema extends StandardSchemaV1<InputArgs, OutputArgs>>(
   schema: Schema,
 ) => Override<Schema, StandardSchemaV1<InputArgs, OutputArgs>>;
@@ -65,9 +63,7 @@ export function labelArgs<
  */
 export function labelArgs<
   InputArgs extends ReadonlyArray<unknown>,
-  OutputArgs extends {
-    [K in keyof InputArgs]: unknown;
-  } = InputArgs,
+  OutputArgs extends ReadonlyArray<unknown> = InputArgs,
 >(schema: StandardSchemaV1<InputArgs, OutputArgs>): StandardSchemaV1<InputArgs, OutputArgs>;
 
 /* #__NO_SIDE_EFFECTS__ */
