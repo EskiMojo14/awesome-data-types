@@ -11,6 +11,7 @@ const config: UserConfig = defineConfig({
       "typescript/array-type": ["error", { default: "generic" }],
       "typescript/consistent-type-imports": "error",
     },
+    ignorePatterns: ["playground.ts"],
   },
   staged: {
     "*.{ts,md}": "vp fmt",
