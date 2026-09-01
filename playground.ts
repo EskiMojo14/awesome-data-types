@@ -6,21 +6,27 @@ function rgbToHex([r, g, b]: [number, number, number]) {
   return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
 }
 
+const channelSchema = v.pipe(v.number(), v.minValue(0), v.maxValue(255));
+
+const pctSchema = v.pipe(v.number(), v.minValue(0), v.maxValue(100));
+
+const hexColorSchema = v.pipe(v.string(), v.hexColor());
+
 // for runtime validation
 const Color = ADT.construct("Color", {
   Rgb: ADTS.labelArgs<[r: number, g: number, b: number]>()(
-    v.tuple([v.number(), v.number(), v.number()]),
+    v.tuple([channelSchema, channelSchema, channelSchema]),
   ),
-  Hex: ADTS.labelArgs<[hex: string]>()(v.tuple([v.string()])),
+  Hex: ADTS.labelArgs<[hex: string]>()(v.tuple([hexColorSchema])),
   Hsl: ADTS.labelArgs<[h: number, s: number, l: number]>()(
-    v.tuple([v.number(), v.number(), v.number()]),
+    v.tuple([v.number(), pctSchema, pctSchema]),
   ),
   // supports transforming inputs
   HexFromRgb: ADTS.labelArgs<[r: number, g: number, b: number], [hex: string]>()(
     v.pipe(
-      v.tuple([v.number(), v.number(), v.number()]),
+      v.tuple([channelSchema, channelSchema, channelSchema]),
       v.transform((rgb) => [rgbToHex(rgb)]),
-      v.tuple([v.string()]),
+      v.tuple([hexColorSchema]),
     ),
   ),
 });
