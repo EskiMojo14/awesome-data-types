@@ -30,7 +30,7 @@ function makeAdtVariantBase<
 ): AdtVariantBase<Name, Variant, VariantSchema> {
   return {
     from(
-      input: StandardSchemaV1.InferOutput<VariantSchema>,
+      ...input: StandardSchemaV1.InferOutput<VariantSchema>
     ): AdtValue<Name, Variant, VariantSchema> {
       return {
         values: input,
@@ -79,7 +79,7 @@ export function construct<const Name extends string, const VariantMap extends Un
   for (const variant in variants) {
     const base = makeAdtVariantBase(name, variant, variants[variant]!);
     target[variant] = Object.assign(function parseSync(...input: Array<unknown>): unknown {
-      return base.from(standard.parseSync(base.schema, input));
+      return base.from(...standard.parseSync(base.schema, input));
     }, base) as never;
   }
 
@@ -118,7 +118,7 @@ export function constructAsync<
     target[variant] = Object.assign(async function parse(
       ...input: Array<unknown>
     ): Promise<unknown> {
-      return base.from(await standard.parse(base.schema, input));
+      return base.from(...(await standard.parse(base.schema, input)));
     }, base) as never;
   }
 
